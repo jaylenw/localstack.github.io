@@ -1,72 +1,293 @@
----
-layout: page
-title: LocalStack
-subtitle: Enabling a local dev&amp;test loop for Cloud applications
-use-site-title: true
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-<div class="posts-list">
-  {% for post in paginator.posts %}
-  <article class="post-preview">
-    <a href="{{ post.url | prepend: site.baseurl }}">
-	  <h2 class="post-title">{{ post.title }}</h2>
+  <meta charset="utf-8">
+  <title>LocalStack</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
 
-	  {% if post.subtitle %}
-	  <h3 class="post-subtitle">
-	    {{ post.subtitle }}
-	  </h3>
-	  {% endif %}
-    </a>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <p class="post-meta">
-      Posted on {{ post.date | date: "%B %-d, %Y" }}
-    </p>
+  <link rel="stylesheet" href="css/raleway.css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <link rel="stylesheet" href="css/github-prettify-theme.css">
 
-    <div class="post-entry-container">
-      {% if post.image %}
-      <div class="post-image">
-        <a href="{{ post.url | prepend: site.baseurl }}">
-          <img src="{{ post.image }}">
-        </a>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/run_prettify.js"></script>
+  <script src="js/site.js"></script>
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-101988473-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+</head>
+<body class="code-snippets-visible">
+
+  <div class="container">
+    <section class="header">
+      <img src="images/localstack.png" style="width: 100px"/>
+      <h1 class="title" style="font-weight: bold">LocalStack</h1>
+      <h3 class="title">Develop and test your cloud apps offline.</h3>
+
+      <div class="docs-section" style="padding-top: 10px">
+
+      <div class="docs-section-1">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://localstack.github.io" data-text="LocalStack - Develop and test your cloud apps offline.">Tweet</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <iframe src="https://ghbtns.com/github-btn.html?user=localstack&amp;repo=localstack&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20" style="margin-left: 10px"></iframe>
+        <iframe src="https://ghbtns.com/github-btn.html?user=localstack&amp;repo=localstack&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20"></iframe>
       </div>
-      {% endif %}
-      <div class="post-entry">
-        {{ post.excerpt | strip_html | xml_escape | truncatewords: site.excerpt_length }}
-        {% assign excerpt_word_count = post.excerpt | number_of_words %}
-        {% if post.content != post.excerpt or excerpt_word_count > site.excerpt_length %}
-          <a href="{{ post.url | prepend: site.baseurl }}" class="post-read-more">[Read&nbsp;More]</a>
-        {% endif %}
+
+
+
+        <div class="value-prop row" style="text-align: center">
+          <div class="four columns value-prop">
+            <img class="value-img" style="width: 50px" src="images/flash.png">
+            Enables a highly efficient dev&amp;test loop. Deploy your application locally in Docker, within seconds.
+          </div>
+          <div class="four columns value-prop">
+            <img class="value-img" style="width: 50px" src="images/money.png">
+            Huge cost savings for development teams of all sizes. No cloud infrastructure needed.
+          </div>
+          <div class="four columns value-prop">
+            <img class="value-img" style="width: 50px" src="images/ci.png">
+            Improve software quality through continuous integration. Stop rolling out untested changes.
+          </div>
+        </div>
       </div>
+
+    </section>
+
+    <div class="navbar-spacer"></div>
+    <nav class="navbar">
+      <div class="container">
+        <ul class="navbar-list">
+          <li class="navbar-item"><a class="navbar-link" href="#intro">Intro</a></li>
+          <li class="navbar-item">
+            <a class="navbar-link" href="#roadmap">Roadmap</a>
+          </li>
+          <li class="navbar-item"><a class="navbar-link" href="#pricing">Pricing</a></li>
+          <li class="navbar-item">
+            <a class="navbar-link" href="#contact">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="docs-section" id="intro">
+      <h6 class="docs-header">Intro</h6>
+      <p>LocalStack provides an easy-to-use test/mocking framework for developing Cloud
+        applications. It spins up a testing environment on your local machine that provides
+        the same functionality and APIs as the real AWS cloud environment.
+      </p>
+      <p>Yes, that's true -
+        you can run your Lambda functions, store data to DynamoDB tables, feed events through
+        Kinesis streams, put your application behind an API Gateway, and much more. And
+        all this happens on your local machine, without ever talking to the cloud.
+      </p>
+      <p style="margin-bottom: 10px">
+        The diagram below illustrates the <b>efficient dev/test and deployment pipeline</b>
+        enabled by LocalStack.
+      </p>
+        <ol>
+          <li>Your application is developed entirely on the local developer
+            machines. LocalStack provisions all required "cloud" resources in a local
+            container.</li>
+          <li>Changes are frequently pushed to a continuous integration server that
+            runs the automated tests. LocalStack provisions all required "cloud"
+            resources</li>
+          <li>Once all tests are green, you flip the switch and the application can
+            be seamlessly deployed to the real AWS cloud environment.</li>
+        </ol>
+      <p>
+        <img style="width: 100%" src="images/diagram.png">
+      </p>
+      <p>Needless to say, this enables an extremely efficient development loop and
+        team collaboration. No more tedious uploading of application code to
+        run a quick test. No more dollars spent on expensive test resources on AWS!
+      </p>
+      <p>
+        <b>Our users love it</b>. Check out the
+        <a href="https://github.com/localstack/localstack">Github repository</a>, or search on
+        <a href="https://twitter.com/search?q=localstack">Twitter</a>/<a
+          href="https://www.google.com/search?q=LocalStack+AWS">Google</a>
+          to find out what people have to say about LocalStack. It's the modern
+          way of developing cloud applications - we hope you're part of it!
+      </p>
     </div>
 
-    {% if post.tags.size > 0 %}
-    <div class="blog-tags">
-      Tags:
-      {% if site.link-tags %}
-      {% for tag in post.tags %}
-      <a href="{{ site.baseurl }}/tag/{{ tag }}">{{ tag }}</a>
-      {% endfor %}
-      {% else %}
-        {{ post.tags | join: ", " }}
-      {% endif %}
+    <div class="docs-section" id="roadmap">
+      <h6 class="docs-header">Roadmap</h6>
+      <p>LocalStack is a very active project that is still under heavy development.
+        This is the place where we will soon publish our roadmap. Please stay tuned.</p>
     </div>
-    {% endif %}
 
-   </article>
-  {% endfor %}
-</div>
+    <div class="docs-section" id="pricing">
+      <h6 class="docs-header">Pricing</h6>
+      <p>LocalStack comes in two flavors - as a free, open source <b>Community Edition</b>,
+        and as a professional <b>Corporate Edition</b>. See the table below for a comparison.</p>
+      <p>We are strongly committed to our open source offering. Our philosophy is that today's
+        best software is built by great people in an open collaboration, and therefore
+        we will continue to contribute a majority of the features back to the Community Edition
+        of LocalStack. If you are using LocalStack in your company (startup or enterprise), we
+        only ask for a small contribution which helps support the future success and growth of
+        the platform and its ecosystem.
+      </p>
 
-{% if paginator.total_pages > 1 %}
-<ul class="pager main-pager">
-  {% if paginator.previous_page %}
-  <li class="previous">
-    <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
-  </li>
-  {% endif %}
-  {% if paginator.next_page %}
-  <li class="next">
-    <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
-  </li>
-  {% endif %}
-</ul>
-{% endif %}
+      <div class="docs-example">
+        <table class="u-full-width center">
+          <thead>
+            <tr>
+              <th class="left">Feature</th>
+              <th>Community Edition</th>
+              <th>Corporate Edition</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="left">Core AWS Services</td>
+              <td>&#x2714;</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Community Updates</td>
+              <td>&#x2714;</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Extended AWS Services</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Updates</td>
+              <td>occasionaly</td>
+              <td>frequently</td>
+            </tr>
+            <tr>
+              <td class="left">CI Integration</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Full Data Persistence</td>
+              <td>-</td>
+              <td>&#x2714; &#42;</td>
+            </tr>
+            <tr>
+              <td class="left">IAM Security</td>
+              <td>-</td>
+              <td>&#x2714; &#42;</td>
+            </tr>
+            <tr>
+              <td class="left">Multi-Region Support</td>
+              <td>-</td>
+              <td>&#x2714; &#42;</td>
+            </tr>
+            <tr>
+              <td class="left">Support</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Updates</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr style="font-weight: bold;">
+              <td class="left">Monthly Price</td>
+              <td>Free</td>
+              <td>Coming soon</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>
+                <a class="button button-primary" href="https://github.com/localstack/localstack"
+                  onClick="_gaq.push(['_trackEvent', 'localstack', 'download'])">Get it now</a>
+              </td>
+              <td>
+                <a class="button button-primary" href="#contact"
+                  onClick="_gaq.push(['_trackEvent', 'localstack', 'signup'])">Stay Tuned!</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          &#42; This feature is still under development. An early version is available, and
+          advanced power features will be added soon (see product roadmap).
+        </p>
+      </div>
+
+    </div>
+
+    <div class="docs-section" id="contact">
+      <h6 class="docs-header">Contact</h6>
+      <div class="row">
+        <div class="six columns">
+          <p>We'd love to get in touch with you. Please subscribe with your email to stay
+            tuned for release notes and product updates. We promise never to send an excessive
+            amount of emails (we hate spam, too).</p>
+        </div>
+        <div class="six columns">
+
+          <!-- Begin MailChimp Signup Form -->
+          <div id="mc_embed_signup">
+          <form action="https://github.us16.list-manage.com/subscribe/post?u=988d9bf9ad8ad389bde9e2c6d&amp;id=7daf893897" method="post" id="mc-embedded-subscribe-form" style="margin-top: 20px"
+            name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+            <div id="mc_embed_signup_scroll">
+              <div style="float: left">
+                <input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="email address" required/>
+              </div>
+              <div style="position: absolute; left: -5000px" aria-hidden="true">
+                <input type="text" name="b_988d9bf9ad8ad389bde9e2c6d_7daf893897" tabindex="-1" value=""/>
+              </div>
+              <div style="float: left">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"/>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<section class="footer u-full-width">
+  <div class="container">
+    <div class="row">
+      <div class="three columns">
+        <h7><b>Navigation</b></h7>
+        <p style="font-size: 13px">
+        <a href="#intro">Intro</a><br/>
+        <a href="#roadmap">Roadmap</a><br/>
+        <a href="#pricing">Pricing</a><br/>
+        <a href="#contact">Contact</a>
+        </p>
+      </div>
+      <div class="four columns">
+        <h7><b>Resources</b></h7>
+        <p style="font-size: 13px">
+        <a href="https://github.com/localstack/localstack">Github repository</a><br/>
+        <a href="">API Docs</a> (coming soon)<br/>
+        <a href="">Terms and Conditions</a> (coming soon)
+        </p>
+      </div>
+      <div class="five columns center">
+        &copy; 2016 - 2017 LocalStack
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
