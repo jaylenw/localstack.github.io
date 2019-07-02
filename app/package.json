@@ -1,8 +1,10 @@
 {
   "name": "localstack-app",
   "dependencies": {
+    "axios": "^0.18.0",
     "react-material-dashboard": "git+https://github.com/whummer/react-material-dashboard.git",
-    "axios": "^0.18.0"
+    "react-redux": "^7.1.0",
+    "redux": "^4.0.1"
   },
   "devDependencies": {
     "customize-cra": "0.2.14",

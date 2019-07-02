@@ -1,32 +1,26 @@
 import axios from 'axios';
 
-const baseURL = 'https://api.localstack.cloud/v1/';
+import { BaseService } from './base';
 
-export class UsersService {
+export class UsersService extends BaseService {
+    defaultPath = 'user';
+
     signin(username, password) {
-        const url = `${baseURL}user/signin`;
         const data = {username, password};
-        return axios.post(url, data).then((res) => {
+        return axios.post(this.url('user/signin'), data).then((res) => {
             return res.data;
         });
     }
     signup(firstname, lastname, email, password) {
-        const url = `${baseURL}user/signup`;
         const data = {firstname, lastname, email, password};
-        return axios.post(url, data).then((res) => {
+        return axios.post(this.url('user/signup'), data).then((res) => {
             return res.data;
-        })
+        });
     }
-    getUserInfo() {
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) {
-          try {
-              return JSON.parse(userInfo);
-          } catch (e) {
-              console.log('ERROR: Unable to parse user info');
-          }
-        }
-        return undefined;
+    getUserDetails() {
+        return axios.get(this.url(), this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
     }
     getUserName() {
         const userInfo = this.getUserInfo();
@@ -34,6 +28,11 @@ export class UsersService {
             return undefined;
         }
         return userInfo.displayName;
+    }
+    saveUserDetails(details) {
+        return axios.post(this.url(), details, this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
     }
 }
 
