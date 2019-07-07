@@ -483,7 +483,7 @@ export class Dashboard extends Component {
           </div>
         }
         </div>
-      </DashboardLayout>
+        </DashboardLayout>
     );
   }
 }
