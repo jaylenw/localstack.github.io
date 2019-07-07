@@ -7,15 +7,18 @@ import { createStore } from 'redux';
 import './initializers';
 
 import * as serviceWorker from 'react-material-dashboard/src/common/serviceWorker';
-import App from 'react-material-dashboard/src/App';
 
 import { reducers } from './state/reducers';
+
+import './assets/index.scss';
+
+import NewApp from './components/app';
 
 const store = createStore(reducers);
 
 ReactDOM.render(
     <Provider store={store}>
-        <App/>
+        <NewApp/>
     </Provider>,
     document.getElementById('root')
 );

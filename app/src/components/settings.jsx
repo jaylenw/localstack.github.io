@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-
-// Externals
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PerfectScrollbar from 'react-perfect-scrollbar';
-
+import { withRouter } from 'react-router-dom';
 import { plansService } from '../services/plans';
+import compose from 'recompose/compose';
 
 // Material helpers
 import { withStyles } from '@material-ui/core';
@@ -13,6 +12,7 @@ import { withStyles } from '@material-ui/core';
 // Material components
 import {
   Button,
+  CircularProgress,
   Grid,
   Radio,
   Table,
@@ -37,7 +37,9 @@ import {
 import { Password } from 'react-material-dashboard/src/views/Settings/components';
 
 // Component styles
-const styles = theme => ({});
+const styles = theme => ({
+  root: {}
+});
 
 class Subscriptions extends Component {
   state = {
@@ -47,7 +49,7 @@ class Subscriptions extends Component {
   constructor() {
     super();
     this.savePlan = this.savePlan.bind(this);
-    this.showTOS = this.showTOS.bind(this);
+    this.showTerms = this.showTerms.bind(this);
   }
 
   componentDidMount() {
@@ -64,8 +66,8 @@ class Subscriptions extends Component {
     this.setState({selectedPlan: plan});
   }
 
-  showTOS() {
-    return this.props.history.push('/tos');
+  showTerms() {
+    return this.props.history.push('/terms');
   }
 
   savePlan() {
@@ -73,7 +75,7 @@ class Subscriptions extends Component {
   }
 
   render() {
-    const { classes, className, ...rest } = this.props;
+    const { classes, className, staticContext, ...rest } = this.props;
 
     const rootClassName = classNames(classes.root, className);
 
@@ -83,6 +85,8 @@ class Subscriptions extends Component {
         <PortletHeader>
           <PortletLabel subtitle="Please choose your plan below" title="Subscription"/>
         </PortletHeader>
+        {this.state.plans.length ?
+        <>
         <PortletContent noPadding>
           <PerfectScrollbar>
             <Table>
@@ -121,12 +125,18 @@ class Subscriptions extends Component {
         <PortletFooter className={classes.portletFooter}>
           <div style={{padding: '10px'}}>
             By clicking the button below, you agree to the
-            <button onClick={this.showTOS}>Terms and Conditions</button> of this service.
+            <button onClick={this.showTerms}>Terms and Conditions</button> of this service.
           </div>
           <Button color="primary" variant="contained" onClick={this.savePlan}>
             Update Subscription
           </Button>
         </PortletFooter>
+        </>
+        :
+        <div style={{textAlign: 'center', padding: '20px'}}>
+          <CircularProgress/>
+        </div>
+        }
         </form>
       </Portlet>
     );
@@ -138,7 +148,7 @@ Subscriptions.propTypes = {
   history: PropTypes.object.isRequired
 };
 
-Subscriptions = withStyles(styles)(Subscriptions);
+Subscriptions = compose(withRouter, withStyles(styles))(Subscriptions);
 
 
 class ApiKeys extends Component {
@@ -153,6 +163,7 @@ class ApiKeys extends Component {
   render() {
     const { classes, className, ...rest } = this.props;
 
+    console.log('classes', classes, className);
     const rootClassName = classNames(classes.root, className);
 
     return (

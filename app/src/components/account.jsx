@@ -69,7 +69,7 @@ export class AccountDetails extends Component {
   }
 
   render() {
-    const { classes, className, ...rest } = this.props;
+    const { classes, className, dispatch, ...rest } = this.props;
     const { firstname, lastname, phone, address, country, email } = this.state;
 
     const rootClassName = classNames(classes.root, className);
