@@ -14,6 +14,7 @@ import {
   Button,
   CircularProgress,
   Grid,
+  Link,
   Radio,
   Table,
   TableBody,
@@ -33,13 +34,97 @@ import {
   PortletFooter
 } from 'react-material-dashboard/src/components';
 
-// Custom components
-import { Password } from 'react-material-dashboard/src/views/Settings/components';
-
 // Component styles
 const styles = theme => ({
   root: {}
 });
+
+class SubscriptionsList extends Component {
+
+    state = {
+      subscriptions: [],
+      isLoading: true
+    };
+
+    componentDidMount() {
+      plansService.loadSubscriptions().then(
+        subscriptions => this.setState({subscriptions: subscriptions, isLoading: false})
+      );
+    }
+
+    render() {
+        const { classes, className } = this.props;
+        const { subscriptions } = this.state;
+        const rootClassName = classNames(classes.root, className);
+
+        console.log('stats', this.props.stats);
+
+        return (
+          <Portlet className={rootClassName}>
+            <PortletHeader>
+              <PortletLabel title="Subscriptions"/>
+            </PortletHeader>
+            <PerfectScrollbar>
+              <PortletContent className={classes.portletContent} noPadding>
+                {this.state.isLoading && (
+                  <div className={classes.progressWrapper + ' centeredPanel'}>
+                    <CircularProgress />
+                  </div>
+                )}
+                {this.state.subscriptions.length > 0 && (
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Price</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell align="left">Total</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {this.state.subscriptions.map(order => (
+                        <TableRow className={classes.tableRow} hover key={order.id}>
+                          <TableCell>{order.id}</TableCell>
+                          <TableCell className={classes.customerCell}>
+                            {order.customer.name}
+                          </TableCell>
+                          <TableCell>
+                            test
+                          </TableCell>
+                          <TableCell>
+                            <div className={classes.statusWrapper}>
+                              {order.status}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+                {!this.state.isLoading && !this.state.subscriptions.length &&
+                  <div className='centeredPanel'>
+                  No subscriptions enabled yet
+                  </div>
+                }
+              </PortletContent>
+            </PerfectScrollbar>
+            <PortletFooter>
+              <Button color="primary" variant="contained" onClick={this.props.newSubscription}>
+                Add New Subscription
+              </Button>
+            </PortletFooter>
+          </Portlet>
+        );
+    }
+}
+
+SubscriptionsList.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+SubscriptionsList = withStyles({})(SubscriptionsList);
+
 
 class Subscriptions extends Component {
   state = {
@@ -125,7 +210,7 @@ class Subscriptions extends Component {
         <PortletFooter className={classes.portletFooter}>
           <div style={{padding: '10px'}}>
             By clicking the button below, you agree to the
-            <button onClick={this.showTerms}>Terms and Conditions</button> of this service.
+            &nbsp;<Link onClick={this.showTerms}>Terms and Conditions</Link> of this service.
           </div>
           <Button color="primary" variant="contained" onClick={this.savePlan}>
             Update Subscription
@@ -133,7 +218,7 @@ class Subscriptions extends Component {
         </PortletFooter>
         </>
         :
-        <div style={{textAlign: 'center', padding: '20px'}}>
+        <div className='centeredPanel'>
           <CircularProgress/>
         </div>
         }
@@ -162,8 +247,6 @@ class ApiKeys extends Component {
 
   render() {
     const { classes, className, ...rest } = this.props;
-
-    console.log('classes', classes, className);
     const rootClassName = classNames(classes.root, className);
 
     return (
@@ -198,6 +281,16 @@ ApiKeys = withStyles(styles)(ApiKeys);
 
 
 export class Settings extends Component {
+  state = {
+    newSubscription: false
+  }
+  constructor() {
+    super();
+    this.newSubscription = this.newSubscription.bind(this);
+  }
+  newSubscription() {
+    this.setState({newSubscription: true});
+  }
   render() {
     const { classes } = this.props;
     return (
@@ -205,13 +298,13 @@ export class Settings extends Component {
         <div className={classes.root}>
           <Grid container spacing={4}>
             <Grid item md={7} xs={12}>
-              <Subscriptions />
+              {this.state.newSubscription ?
+              <Subscriptions /> :
+              <SubscriptionsList newSubscription={this.newSubscription} />
+              }
             </Grid>
             <Grid item md={5} xs={12}>
-              <Password />
-              <Grid item md={12} xs={12} style={{marginTop: '20px'}}>
-                <ApiKeys />
-              </Grid>
+              <ApiKeys />
             </Grid>
           </Grid>
         </div>

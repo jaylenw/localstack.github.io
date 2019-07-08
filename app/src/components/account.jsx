@@ -22,6 +22,9 @@ import { withStyles } from '@material-ui/core';
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
 
+// Custom components
+import { Password } from 'react-material-dashboard/src/views/Settings/components';
+
 // Material components
 import { Button, TextField, Grid } from '@material-ui/core';
 
@@ -191,6 +194,9 @@ class AccountContainer extends Component {
             </Grid>
             <Grid item lg={6} md={6} xl={6} xs={12}>
               <AccountBilling />
+              <Grid item md={12} xs={12} style={{marginTop: '20px'}}>
+                <Password />
+              </Grid>
             </Grid>
           </Grid>
         </div>
