@@ -11,9 +11,15 @@ export class PlansService extends BaseService {
         });
     }
     loadSubscriptions() {
-          return axios.get(this.url('plans/subscriptions'), this.getAuthHeaders()).then((res) => {
-              return res.data;
-          });
+        return axios.get(this.url('plans/subscriptions'), this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
+    }
+    createSubscription(product, quantity) {
+        const data = {product, quantity};
+        return axios.post(this.url('plans/subscriptions'), data, this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
     }
 }
 

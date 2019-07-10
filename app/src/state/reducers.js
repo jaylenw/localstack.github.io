@@ -9,4 +9,4 @@ export const userInfo = (state, action) => {
 
 export const reducers = combineReducers({
     userInfo
-})
+});

@@ -12,12 +12,13 @@ import {
   Grid,
   Link,
   CircularProgress,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
+  Select,
   Tooltip,
   TableSortLabel,
   Typography } from '@material-ui/core';
@@ -68,8 +69,6 @@ class ResourcesList extends Component {
 
         const rootClassName = classNames(classes.root, className);
         const showOrders = !isLoading && orders.length > 0;
-
-        console.log('stats', this.props.stats);
 
         return (
           <Portlet className={rootClassName}>
@@ -192,7 +191,7 @@ export class Dashboard extends Component {
 
   loadSubscriptions() {
     plansService.loadSubscriptions().then(subs => {
-      console.log('subs', subs);
+      console.log(subs)
       this.setState({subscriptions: subs});
       this.loadStats();
     });
@@ -200,7 +199,6 @@ export class Dashboard extends Component {
 
   loadStats() {
     eventsService.getStats(this.state.apiKey).then(stats => {
-      console.log('stats', stats);
       this.setState({stats});
     });
   }
@@ -237,9 +235,15 @@ export class Dashboard extends Component {
             &nbsp;to your account to enable the dashboard view.
           </Paper>
         :
-          <div rendered={this.hasSubscriptions()}>
-          <TextField className={classes.textField} onChange={this.handleChange('apiKey')}
-            label="API Key" margin="dense" required value={apiKey} variant="outlined"/>
+          <div>
+            Choose Subscription:
+            <Select className={classes.textField} onChange={this.handleChange('apiKey')}
+              label="API Key" margin="dense" required value={apiKey} variant="outlined">
+              {this.state.subscriptions.map(sub =>
+                <MenuItem key={sub.id} value={sub.metadata.license_key}>
+                  {`${sub.plan.name} (key ${sub.metadata.license_key})`}
+                </MenuItem>)}
+            </Select>
             <Grid container spacing={4}>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
                 <ResourcesCounter className={classes.item} stats={(this.state || {}).stats} />

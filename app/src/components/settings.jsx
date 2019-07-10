@@ -13,6 +13,7 @@ import { withStyles } from '@material-ui/core';
 import {
   Button,
   CircularProgress,
+  Checkbox,
   Grid,
   Link,
   Radio,
@@ -20,7 +21,8 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableRow } from '@material-ui/core';
+  TableRow,
+  TextField } from '@material-ui/core';
 
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
@@ -57,8 +59,6 @@ class SubscriptionsList extends Component {
         const { subscriptions } = this.state;
         const rootClassName = classNames(classes.root, className);
 
-        console.log('stats', this.props.stats);
-
         return (
           <Portlet className={rootClassName}>
             <PortletHeader>
@@ -71,7 +71,7 @@ class SubscriptionsList extends Component {
                     <CircularProgress />
                   </div>
                 )}
-                {this.state.subscriptions.length > 0 && (
+                {subscriptions.length > 0 && (
                   <Table>
                     <TableHead>
                       <TableRow>
@@ -83,7 +83,7 @@ class SubscriptionsList extends Component {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {this.state.subscriptions.map(order => (
+                      {subscriptions.map(order => (
                         <TableRow className={classes.tableRow} hover key={order.id}>
                           <TableCell>{order.id}</TableCell>
                           <TableCell className={classes.customerCell}>
@@ -102,7 +102,7 @@ class SubscriptionsList extends Component {
                     </TableBody>
                   </Table>
                 )}
-                {!this.state.isLoading && !this.state.subscriptions.length &&
+                {!this.state.isLoading && !subscriptions.length &&
                   <div className='centeredPanel'>
                   No subscriptions enabled yet
                   </div>
@@ -126,19 +126,16 @@ SubscriptionsList.propTypes = {
 SubscriptionsList = withStyles({})(SubscriptionsList);
 
 
-class Subscriptions extends Component {
+class SubscriptionCreate extends Component {
   state = {
-    plans: []
+    plans: [],
+    quantity: 1,
+    accepted: false
   };
-
-  constructor() {
-    super();
-    this.savePlan = this.savePlan.bind(this);
-    this.showTerms = this.showTerms.bind(this);
-  }
+  maxQuantity = 20;
 
   componentDidMount() {
-    this.setState({selectedPlan: 'p1'});
+    this.setState({selectedPlan: null});
     plansService.loadPlans().then(
       plans => this.setState({plans: plans})
     );
@@ -151,17 +148,36 @@ class Subscriptions extends Component {
     this.setState({selectedPlan: plan});
   }
 
-  showTerms() {
+  showTerms = () => {
     return this.props.history.push('/terms');
-  }
+  };
 
-  savePlan() {
-    console.log('savePlan');
-  }
+  createSubscription = () => {
+    this.setState({errorMessage: ''});
+    plansService.createSubscription(this.state.selectedPlan, this.state.quantity).then(
+      subs => this.props.history.push('/')
+    ).catch((error) => {
+      this.setState({errorMessage: 'An error occurred and your request could not be processed. ' +
+        'Please check if your payment details are up to date in the account settings.'});
+    });
+  };
+
+  updateQuantity = event => {
+    let quantity = event.target.value;
+    if (isNaN(quantity)) {
+      return;
+    }
+    if (quantity === '') {
+      quantity = 0;
+    }
+    quantity = parseInt(quantity);
+    if (quantity >= 0 && quantity <= 20) {
+      this.setState({ quantity });
+    }
+  };
 
   render() {
     const { classes, className, staticContext, ...rest } = this.props;
-
     const rootClassName = classNames(classes.root, className);
 
     return (
@@ -173,49 +189,76 @@ class Subscriptions extends Component {
         {this.state.plans.length ?
         <>
         <PortletContent noPadding>
-          <PerfectScrollbar>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Name</TableCell>
-                  <TableCell align="left">Features</TableCell>
-                  <TableCell align="left">Price</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.state.plans
-                  .sort((p1, p2) => (p1.price > p2.price))
-                  .map(plan =>
-                  (<TableRow className={classes.tableRow} hover
-                    key={plan.id} selected={this.state.selectedPlan === plan.id}>
-                    <TableCell className={classes.tableCell}>
-                      <div className={classes.tableCellInner}>
-                        <Radio checked={this.state.selectedPlan === plan.id}
-                          color="primary" onChange={event => this.handleSelect(plan.id)} value="true"/>
-                        {plan.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className={classes.tableCell}>
-                      {plan.description}
-                    </TableCell>
-                    <TableCell className={classes.tableCell}>
-                      {plan.price} USD / month
-                    </TableCell>
-                  </TableRow>)
-                )}
-              </TableBody>
-            </Table>
-          </PerfectScrollbar>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Features</TableCell>
+                <TableCell align="left">Price</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.state.plans
+                .sort((p1, p2) => (p1.price > p2.price))
+                .map(plan =>
+                (<TableRow className={classes.tableRow} hover
+                  key={plan.id} selected={(this.state.selectedPlan || {}).id === plan.id}>
+                  <TableCell className={classes.tableCell}>
+                    <div className={classes.tableCellInner}>
+                      <Radio checked={(this.state.selectedPlan || {}).id === plan.id}
+                        color="primary" onChange={event => this.handleSelect(plan)} value="true"/>
+                      {plan.name}
+                    </div>
+                  </TableCell>
+                  <TableCell className={classes.tableCell}>
+                    {plan.description}
+                  </TableCell>
+                  <TableCell className={classes.tableCell}>
+                    {plan.price} USD / month
+                  </TableCell>
+                </TableRow>)
+              )}
+            </TableBody>
+          </Table>
         </PortletContent>
-        <PortletFooter className={classes.portletFooter}>
-          <div style={{padding: '10px'}}>
-            By clicking the button below, you agree to the
-            &nbsp;<Link onClick={this.showTerms}>Terms and Conditions</Link> of this service.
-          </div>
-          <Button color="primary" variant="contained" onClick={this.savePlan}>
-            Update Subscription
-          </Button>
-        </PortletFooter>
+        {!!this.state.selectedPlan &&
+          <>
+            <PortletContent>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Selected Plan:</TableCell>
+                    <TableCell>{this.state.selectedPlan.name}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Select Quantity (1-{this.maxQuantity}):</TableCell>
+                    <TableCell>
+                      <TextField className={classes.textField} variant="outlined" onChange={this.updateQuantity}
+                      label="Quantity" margin="dense" required value={this.state.quantity}/>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Monthly Costs:</TableCell>
+                    <TableCell>{this.state.selectedPlan.price * this.state.quantity} USD</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </PortletContent>
+            <PortletFooter className={classes.portletFooter}>
+              <div style={{padding: '10px'}}>
+                <Checkbox checked={this.state.accepted}
+                  onChange={e => this.setState({accepted: !this.state.accepted})}/>
+                I agree to the
+                &nbsp;<Link onClick={this.showTerms}>Terms and Conditions</Link> of this service.
+              </div>
+              <Button color="primary" variant="contained" onClick={this.createSubscription}
+                  disabled={!this.state.quantity || !this.state.accepted}>
+                Create Subscription
+              </Button>
+              <div style={{padding: '8px', color: 'red'}}>{this.state.errorMessage}</div>
+            </PortletFooter>
+          </>
+        }
         </>
         :
         <div className='centeredPanel'>
@@ -228,12 +271,12 @@ class Subscriptions extends Component {
   }
 }
 
-Subscriptions.propTypes = {
+SubscriptionCreate.propTypes = {
   classes: PropTypes.object.isRequired,
   history: PropTypes.object.isRequired
 };
 
-Subscriptions = compose(withRouter, withStyles(styles))(Subscriptions);
+SubscriptionCreate = compose(withRouter, withStyles(styles))(SubscriptionCreate);
 
 
 class ApiKeys extends Component {
@@ -297,15 +340,19 @@ export class Settings extends Component {
       <DashboardLayout title="Settings">
         <div className={classes.root}>
           <Grid container spacing={4}>
+            {this.state.newSubscription ?
+            <Grid item md={9} xs={12}>
+              <SubscriptionCreate />
+            </Grid> :
+            <>
             <Grid item md={7} xs={12}>
-              {this.state.newSubscription ?
-              <Subscriptions /> :
               <SubscriptionsList newSubscription={this.newSubscription} />
-              }
             </Grid>
             <Grid item md={5} xs={12}>
               <ApiKeys />
             </Grid>
+            </>
+            }
           </Grid>
         </div>
       </DashboardLayout>
