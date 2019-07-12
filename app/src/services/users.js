@@ -34,6 +34,16 @@ export class UsersService extends BaseService {
             return res.data;
         });
     }
+    getCreditCard() {
+        return axios.get(this.url('user/cards'), this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
+    }
+    saveCreditCard(card) {
+        return axios.post(this.url('user/cards'), card, this.getAuthHeaders()).then((res) => {
+            return res.data;
+        });
+    }
 }
 
 export const usersService = new UsersService();

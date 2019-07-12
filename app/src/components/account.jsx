@@ -2,8 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
+import { injectStripe, StripeProvider, Elements,
+  CardNumberElement, CardCVCElement, CardExpiryElement
+} from 'react-stripe-elements';
 
 import { usersService } from '../services/users';
+import { stripePublicKey } from '../config';
 
 // Shared components
 import {
@@ -16,8 +20,14 @@ import {
 
 import { default as detailsStyles } from 'react-material-dashboard/src/views/Account/components/AccountDetails/styles';
 
-// Material helpers
-import { withStyles } from '@material-ui/core';
+// Material components
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  withStyles
+} from '@material-ui/core';
 
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
@@ -128,10 +138,35 @@ AccountDetails = withStyles(detailsStyles)(AccountDetails);
 
 
 export class AccountBilling extends Component {
-    state = {}
+    state = {
+      currentCard: null
+    }
+
+    componentDidMount() {
+      usersService.getCreditCard().then(
+        currentCard => this.setState({currentCard})
+      );
+    }
 
     handleChange = name => event => {
       this.setState({ ...this.state, [name]: event.target.value });
+    };
+
+    savePayment = (ev) => {
+      ev.preventDefault();
+      const request = {type: 'card'};
+      this.props.stripe.createToken(request).then(
+        token => {
+          if (!token.token) return;
+          console.log('token',  token);
+          const card = {
+            token: token.token.id
+          };
+          usersService.saveCreditCard(card).then(
+            currentCard => this.setState({currentCard})
+          )
+        }
+      );
     };
 
     render() {
@@ -141,30 +176,69 @@ export class AccountBilling extends Component {
 
       return (
         <Portlet {...rest} className={rootClassName}>
-          <form autoComplete="off" noValidate onSubmit={this.saveUser}>
-          <PortletHeader>
-            <PortletLabel subtitle="Please provide your billing details" title="Billing"/>
-          </PortletHeader>
-          <PortletContent noPadding>
-            <div className={classes.field}>
-              <TextField className={classes.textField} onChange={this.handleChange('cardNumber')}
-                label="Card Number" margin="dense" required value={cardNumber} variant="outlined"/>
-              <TextField className={classes.textField} label="Month" margin="dense" style={{width: '100px'}}
-                onChange={this.handleChange('expiryMonth')} required value={expiryMonth} variant="outlined"/>
-              <TextField className={classes.textField} label="Year" margin="dense" style={{width: '100px'}}
-                onChange={this.handleChange('expiryYear')} required value={expiryYear} variant="outlined"/>
-              <div>
-              <TextField className={classes.textField} label="CCV" margin="dense" style={{width: '100px'}}
-                onChange={this.handleChange('ccv')} required value={ccv} variant="outlined"/>
+          <form autoComplete="off" noValidate onSubmit={this.savePayment}>
+            <PortletHeader>
+              <PortletLabel subtitle="Billing details listed below" title="Billing"/>
+            </PortletHeader>
+            <PortletContent noPadding>
+              <div className={classes.field}>
+                {this.state.currentCard ?
+                  <>
+                    <b>Current card:</b> ends with <b>{this.state.currentCard.last4}</b>
+                  </> :
+                  'No card defined yet.'
+                }
+                {!this.state.newCard &&
+                <div style={{marginTop: '10px'}}>
+                <Button onClick={() => this.setState({newCard: true})}
+                  color="primary" variant="outlined">Add New Card</Button>
+                </div>
+                }
               </div>
-            </div>
-          </PortletContent>
-          <PortletFooter className={classes.portletFooter}>
-            <Button color="primary" variant="contained" onClick={this.savePayment}>
-              Save details
-            </Button>
-            <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
-          </PortletFooter>
+            </PortletContent>
+            {this.state.newCard &&
+            <>
+              <PortletContent>
+                <div>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell style={{width: '150px'}}>Card Number</TableCell>
+                        <TableCell><CardNumberElement style={{base: {fontSize: '17px'}}}/></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Expiry</TableCell>
+                        <TableCell><CardExpiryElement style={{base: {fontSize: '17px'}}}/></TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>CVC</TableCell>
+                        <TableCell><CardCVCElement style={{base: {fontSize: '17px'}}}/></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  <div style={{display: 'none'}}>
+                    <TextField className={classes.textField} onChange={this.handleChange('cardNumber')}
+                      label="Card Number" margin="dense" required value={cardNumber} variant="outlined"/>
+                    <TextField className={classes.textField} label="Month" margin="dense" style={{width: '100px'}}
+                      onChange={this.handleChange('expiryMonth')} required value={expiryMonth} variant="outlined"/>
+                    <TextField className={classes.textField} label="Year" margin="dense" style={{width: '100px'}}
+                      onChange={this.handleChange('expiryYear')} required value={expiryYear} variant="outlined"/>
+                    <div>
+                    <TextField className={classes.textField} label="CCV" margin="dense" style={{width: '100px'}}
+                      onChange={this.handleChange('ccv')} required value={ccv} variant="outlined"/>
+                    </div>
+                  </div>
+                </div>
+              </PortletContent>
+              <PortletFooter className={classes.portletFooter}>
+                <Button type="submit" color="primary" variant="contained">
+                  Update Payment Details
+                </Button>
+                <PortletLabel subtitle='Secure payment provided by https://stripe.com'
+                  style={{marginTop: '10px'}}/>
+              </PortletFooter>
+            </>
+            }
           </form>
         </Portlet>
       );
@@ -176,7 +250,7 @@ AccountBilling.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-AccountBilling = withStyles(detailsStyles)(AccountBilling);
+AccountBilling = withStyles(detailsStyles)(injectStripe(AccountBilling));
 
 
 class AccountContainer extends Component {
@@ -193,7 +267,11 @@ class AccountContainer extends Component {
               <AccountDetails />
             </Grid>
             <Grid item lg={6} md={6} xl={6} xs={12}>
-              <AccountBilling />
+              <StripeProvider apiKey={stripePublicKey}>
+                <Elements>
+                  <AccountBilling />
+                </Elements>
+              </StripeProvider>
               <Grid item md={12} xs={12} style={{marginTop: '20px'}}>
                 <Password />
               </Grid>

@@ -9,16 +9,15 @@ import './initializers';
 import * as serviceWorker from 'react-material-dashboard/src/common/serviceWorker';
 
 import { reducers } from './state/reducers';
+import NewApp from './components/app';
 
 import './assets/index.scss';
-
-import NewApp from './components/app';
 
 const store = createStore(reducers);
 
 ReactDOM.render(
     <Provider store={store}>
-        <NewApp/>
+      <NewApp/>
     </Provider>,
     document.getElementById('root')
 );

@@ -19,8 +19,6 @@ import {
   TableHead,
   TableRow,
   Select,
-  Tooltip,
-  TableSortLabel,
   Typography } from '@material-ui/core';
 
 // Material icons
@@ -47,8 +45,7 @@ import {
   Portlet,
   PortletHeader,
   PortletLabel,
-  PortletContent,
-  Status
+  PortletContent
 } from 'react-material-dashboard/src/components';
 
 import { eventsService } from '../services/events';
@@ -57,23 +54,22 @@ import { plansService } from '../services/plans';
 class ResourcesList extends Component {
 
     state = {
-      isLoading: true,
-      limit: 10,
-      orders: [],
-      ordersTotal: 0
+      isLoading: true
     };
 
     render() {
         const { classes, className } = this.props;
-        const { isLoading, orders, ordersTotal } = this.state;
+        const statsEvents = (this.props.stats || {}).events;
+        const isLoading = typeof statsEvents === 'undefined';
+        const events = (statsEvents && statsEvents.latest) || [];
 
         const rootClassName = classNames(classes.root, className);
-        const showOrders = !isLoading && orders.length > 0;
+        const showEvents = !isLoading && events.length > 0;
 
         return (
           <Portlet className={rootClassName}>
             <PortletHeader noDivider>
-              <PortletLabel subtitle={`${ordersTotal} in total`} title="Latest Events"/>
+              <PortletLabel title="Latest Events"/>
             </PortletHeader>
             <PerfectScrollbar>
               <PortletContent className={classes.portletContent} noPadding>
@@ -82,38 +78,25 @@ class ResourcesList extends Component {
                     <CircularProgress />
                   </div>
                 )}
-                {showOrders && (
+                {showEvents && (
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>Order ID</TableCell>
-                        <TableCell align="left">Customer</TableCell>
-                        <TableCell align="left" sortDirection="desc">
-                          <Tooltip enterDelay={300} title="Sort">
-                            <TableSortLabel active direction="desc">
-                              Date
-                            </TableSortLabel>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell align="left">Status</TableCell>
+                        <TableCell>Server Time</TableCell>
+                        <TableCell align="left">Event Type</TableCell>
+                        <TableCell align="left">Machine ID</TableCell>
+                        <TableCell align="left">Process ID</TableCell>
+                        <TableCell align="left">Payload</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {orders.map(order => (
-                        <TableRow className={classes.tableRow} hover key={order.id}>
-                          <TableCell>{order.id}</TableCell>
-                          <TableCell className={classes.customerCell}>
-                            {order.customer.name}
-                          </TableCell>
-                          <TableCell>
-                            test
-                          </TableCell>
-                          <TableCell>
-                            <div className={classes.statusWrapper}>
-                              <Status className={classes.status} size="sm"/>
-                              {order.status}
-                            </div>
-                          </TableCell>
+                      {events.map(item => (
+                        <TableRow className={classes.tableRow} hover key={item.e_t + item.s_t + item.p}>
+                          <TableCell>{item.s_t}</TableCell>
+                          <TableCell>{item.e_t}</TableCell>
+                          <TableCell>{item.m_id}</TableCell>
+                          <TableCell>{item.p_id}</TableCell>
+                          <TableCell>{item.p}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -145,7 +128,7 @@ class ResourcesCounter extends Component {
               RESOURCES
             </Typography>
             <Typography className={classes.value} variant="h3">
-              {((this.props.stats || {}).events || {}).count}
+              {(((this.props.stats || {}).events || {}).counts || {}).total}
             </Typography>
           </div>
           <div className={classes.iconWrapper}>
@@ -191,7 +174,6 @@ export class Dashboard extends Component {
 
   loadSubscriptions() {
     plansService.loadSubscriptions().then(subs => {
-      console.log(subs)
       this.setState({subscriptions: subs});
       this.loadStats();
     });
@@ -254,7 +236,7 @@ export class Dashboard extends Component {
               <Grid item lg={4} sm={6} xl={4} xs={12}>
                 <Progress className={classes.item} />
               </Grid>
-              <Grid item lg={4} md={6} xl={3} xs={12}>
+              <Grid item lg={8} md={12} xl={8} xs={12}>
                 <ResourcesList className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
             </Grid>
