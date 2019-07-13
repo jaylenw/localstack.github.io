@@ -6,3 +6,11 @@ div.centeredPanel {
   text-align: center;
   padding: 20px;
 }
+
+table.compactTable td, table.compactTable th {
+  padding: 10px;
+}
+
+table.compactTable tr {
+  height: auto;
+}

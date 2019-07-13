@@ -16,6 +16,7 @@ import {
   Checkbox,
   Grid,
   Link,
+  Modal,
   Radio,
   Table,
   TableBody,
@@ -38,85 +39,175 @@ import {
 
 // Component styles
 const styles = theme => ({
-  root: {}
+  root: {},
+  modal: {
+    width: '50%',
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)'
+  }
 });
+
+
+class CancelModal extends Component {
+  state = {
+    closedRequest: null
+  }
+  handleClose = () => {
+    this.setState({closedRequest: this.props.request});
+  }
+  isOpen = () => {
+    return typeof this.props.request !== 'undefined' && this.state.closedRequest !== this.props.request;
+  }
+  render() {
+    const { classes, className, subscription } = this.props;
+    const modalClassName = classNames(classes.modal, className);
+    return (
+      <Modal open={this.isOpen()} onClose={this.handleClose}>
+        <Portlet className={modalClassName}>
+          <PortletHeader>
+            <PortletLabel title="Cancel Subscription"/>
+          </PortletHeader>
+          <PortletContent>
+            <div style={{padding: '10px'}}>
+              Are you sure that you want to delete the following subscription:
+            </div>
+            {subscription &&
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Subscription ID:</TableCell>
+                  <TableCell>{subscription.id}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Plan Type:</TableCell>
+                  <TableCell>{subscription.plan.name}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Quantity:</TableCell>
+                  <TableCell>{subscription.quantity}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Monthly Costs:</TableCell>
+                  <TableCell>{subscription.quantity * subscription.plan.amount} USD</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            }
+            <div style={{padding: '10px', marginTop: '10px'}}>
+              Please note that <b>all API keys, events, and other data</b> associated with this
+              subscription <b>will be permanently deleted</b>!
+            </div>
+          </PortletContent>
+          <PortletFooter className={classes.portletFooter}>
+            <Button color="primary" variant="contained" onClick={this.props.onConfirm}>
+              Confirm Deletion
+            </Button>
+          </PortletFooter>
+        </Portlet>
+      </Modal>
+    );
+  }
+}
+
+CancelModal.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+CancelModal = withStyles(styles)(CancelModal);
+
 
 class SubscriptionsList extends Component {
 
-    state = {
-      subscriptions: [],
-      isLoading: true
-    };
+  state = {
+    subscriptions: [],
+    isLoading: true,
+    activeSubscription: null
+  };
 
-    componentDidMount() {
-      plansService.loadSubscriptions().then(
-        subscriptions => this.setState({subscriptions: subscriptions, isLoading: false})
-      );
-    }
+  componentDidMount() {
+    this.loadSubscriptions();
+  }
+  loadSubscriptions = () => {
+    this.setState({isLoading: true, subscriptions: []});
+    plansService.loadSubscriptions().then(
+      subscriptions => this.setState({subscriptions: subscriptions, isLoading: false})
+    );
+  }
+  cancel = (subscription) => {
+    this.setState({cancelRequest: Math.random(), activeSubscription: subscription});
+  }
+  confirmCancellation = () => {
+    plansService.cancelSubscription(this.state.activeSubscription).then(
+      () => {
+        this.setState({cancelRequest: null, activeSubscription: null});
+        this.loadSubscriptions();
+      }
+    );
+  }
+  render() {
+    const { classes, className } = this.props;
+    const { subscriptions } = this.state;
+    const rootClassName = classNames(classes.root, className);
 
-    render() {
-        const { classes, className } = this.props;
-        const { subscriptions } = this.state;
-        const rootClassName = classNames(classes.root, className);
-
-        return (
-          <Portlet className={rootClassName}>
-            <PortletHeader>
-              <PortletLabel title="Subscriptions"/>
-            </PortletHeader>
-            <PerfectScrollbar>
-              <PortletContent className={classes.portletContent} noPadding>
-                {this.state.isLoading && (
-                  <div className={classes.progressWrapper + ' centeredPanel'}>
-                    <CircularProgress />
-                  </div>
-                )}
-                {subscriptions.length > 0 && (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Description</TableCell>
-                        <TableCell>Price</TableCell>
-                        <TableCell>Quantity</TableCell>
-                        <TableCell align="left">Total</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {subscriptions.map(order => (
-                        <TableRow className={classes.tableRow} hover key={order.id}>
-                          <TableCell>{order.id}</TableCell>
-                          <TableCell className={classes.customerCell}>
-                            {order.customer.name}
-                          </TableCell>
-                          <TableCell>
-                            test
-                          </TableCell>
-                          <TableCell>
-                            <div className={classes.statusWrapper}>
-                              {order.status}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-                {!this.state.isLoading && !subscriptions.length &&
-                  <div className='centeredPanel'>
-                  No subscriptions enabled yet
-                  </div>
-                }
-              </PortletContent>
-            </PerfectScrollbar>
-            <PortletFooter>
-              <Button color="primary" variant="contained" onClick={this.props.newSubscription}>
-                Add New Subscription
-              </Button>
-            </PortletFooter>
-          </Portlet>
-        );
-    }
+    return (
+      <Portlet className={rootClassName}>
+        <CancelModal subscription={this.state.activeSubscription}
+          request={this.state.cancelRequest} onConfirm={this.confirmCancellation} />
+        <PortletHeader>
+          <PortletLabel title="Subscriptions"/>
+        </PortletHeader>
+        <PerfectScrollbar>
+          <PortletContent className={classes.portletContent} noPadding>
+            {this.state.isLoading && (
+              <div className={classes.progressWrapper + ' centeredPanel'}>
+                <CircularProgress />
+              </div>
+            )}
+            {subscriptions.length > 0 && (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Price</TableCell>
+                    <TableCell>Qty</TableCell>
+                    <TableCell>Total</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {subscriptions.map(sub => (
+                    <TableRow className={classes.tableRow} hover key={sub.id}>
+                      <TableCell><Link>{sub.plan.name}</Link></TableCell>
+                      <TableCell>{sub.plan.amount} USD / month</TableCell>
+                      <TableCell>{sub.quantity}</TableCell>
+                      <TableCell>{sub.plan.amount * sub.quantity} USD / month</TableCell>
+                      <TableCell>active</TableCell>
+                      <TableCell>
+                        <Button variant="outlined" onClick={() => this.cancel(sub)}>Cancel</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {!this.state.isLoading && !subscriptions.length &&
+              <div className='centeredPanel'>
+              No subscriptions enabled yet
+              </div>
+            }
+          </PortletContent>
+        </PerfectScrollbar>
+        <PortletFooter>
+          <Button color="primary" variant="contained" onClick={this.props.newSubscription}>
+            Add New Subscription
+          </Button>
+        </PortletFooter>
+      </Portlet>
+    );
+  }
 }
 
 SubscriptionsList.propTypes = {
@@ -139,12 +230,9 @@ class SubscriptionCreate extends Component {
     plansService.loadPlans().then(
       plans => this.setState({plans: plans})
     );
-    plansService.loadSubscriptions().then(
-      subscriptions => this.setState({subscriptions: subscriptions})
-    );
   }
 
-  handleSelect(plan) {
+  handleSelect = (plan) => {
     this.setState({selectedPlan: plan});
   }
 

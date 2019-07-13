@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PerfectScrollbar from 'react-perfect-scrollbar';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
 
@@ -35,10 +34,7 @@ import counterStyles from 'react-material-dashboard/src/views/Dashboard/componen
 import { Paper } from 'react-material-dashboard/src/components';
 
 // Custom components
-import {
-  Users,
-  Progress
-} from 'react-material-dashboard/src/views/Dashboard/components';
+import { Progress } from 'react-material-dashboard/src/views/Dashboard/components';
 
 // Shared components
 import {
@@ -57,6 +53,27 @@ class ResourcesList extends Component {
       isLoading: true
     };
 
+    getResource = (eventType) => {
+      const resource = eventType.split('.')[0];
+      const resources = {
+        's3': 'S3',
+        'ddb': 'DynamoDB',
+        'kns': 'Kinesis',
+        'inf': 'Infrastructure'
+      }
+      return resources[resource] || `Generic (${eventType})`;
+    }
+    getAction = (eventType) => {
+      const actions = {
+        's3.cb': 'Create bucket',
+        'inf.up': 'Start up',
+        'inf.dn': 'Shut down',
+        'ddb.ct': 'Create table',
+        'kns.cs': 'Create stream'
+      }
+      return actions[eventType];
+    }
+
     render() {
         const { classes, className } = this.props;
         const statsEvents = (this.props.stats || {}).events;
@@ -68,42 +85,45 @@ class ResourcesList extends Component {
 
         return (
           <Portlet className={rootClassName}>
-            <PortletHeader noDivider>
+            <PortletHeader>
               <PortletLabel title="Latest Events"/>
             </PortletHeader>
-            <PerfectScrollbar>
-              <PortletContent className={classes.portletContent} noPadding>
-                {isLoading && (
-                  <div className={classes.progressWrapper}>
-                    <CircularProgress />
-                  </div>
-                )}
-                {showEvents && (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Server Time</TableCell>
-                        <TableCell align="left">Event Type</TableCell>
-                        <TableCell align="left">Machine ID</TableCell>
-                        <TableCell align="left">Process ID</TableCell>
-                        <TableCell align="left">Payload</TableCell>
+            <PortletContent className={classes.portletContent} noPadding>
+              {isLoading && (
+                <div className={classes.progressWrapper + ' centeredPanel'}>
+                  <CircularProgress />
+                </div>
+              )}
+              {showEvents && (
+                <Table className='compactTable'>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Server Time</TableCell>
+                      <TableCell>Resource</TableCell>
+                      <TableCell>Action</TableCell>
+                      <TableCell>Machine ID</TableCell>
+                      <TableCell>Process ID</TableCell>
+                      <TableCell>Payload</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {events.map(item => (
+                      <TableRow className={classes.tableRow} hover key={item.e_t + item.s_t + item.p}>
+                        <TableCell>{item.s_t}</TableCell>
+                        <TableCell>{this.getResource(item.e_t)}</TableCell>
+                        <TableCell>{this.getAction(item.e_t)}</TableCell>
+                        <TableCell>{item.m_id}</TableCell>
+                        <TableCell>{item.p_id}</TableCell>
+                        <TableCell>{item.p}</TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {events.map(item => (
-                        <TableRow className={classes.tableRow} hover key={item.e_t + item.s_t + item.p}>
-                          <TableCell>{item.s_t}</TableCell>
-                          <TableCell>{item.e_t}</TableCell>
-                          <TableCell>{item.m_id}</TableCell>
-                          <TableCell>{item.p_id}</TableCell>
-                          <TableCell>{item.p}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </PortletContent>
-            </PerfectScrollbar>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+              {!isLoading && !showEvents &&
+                <div className={'centeredPanel'}>No events recorded yet.</div>
+              }
+            </PortletContent>
           </Portlet>
         );
     }
@@ -116,6 +136,18 @@ ResourcesList.propTypes = {
 ResourcesList = withStyles({})(ResourcesList);
 
 class ResourcesCounter extends Component {
+  EVENT_TYPES_CREATION = ['s3.cb', 'ddb.ct', 'kns.cs'];
+
+  count = () => {
+    const events = (this.props.stats || {}).events;
+    if (!events || !events.counts.event_types) return 0;
+    const result = Object.keys(events.counts.event_types).reduce((count, e) => {
+      const value = this.EVENT_TYPES_CREATION.includes(e) ? events.counts.event_types[e] : 0;
+      return value + count;
+    }, 0);
+    return result;
+  }
+
   render() {
     const { classes, className, ...rest } = this.props;
     const rootClassName = classNames(classes.root, className);
@@ -125,10 +157,10 @@ class ResourcesCounter extends Component {
         <div className={classes.content}>
           <div className={classes.details}>
             <Typography className={classes.title} variant="body2">
-              RESOURCES
+              RESOURCES CREATED
             </Typography>
             <Typography className={classes.value} variant="h3">
-              {(((this.props.stats || {}).events || {}).counts || {}).total}
+              {this.count()}
             </Typography>
           </div>
           <div className={classes.iconWrapper}>
@@ -156,6 +188,47 @@ ResourcesCounter.propTypes = {
 ResourcesCounter = withStyles(counterStyles)(ResourcesCounter);
 
 
+class EventsCounter extends Component {
+  render() {
+    const { classes, className, ...rest } = this.props;
+    const rootClassName = classNames(classes.root, className);
+
+    return (
+      <Paper {...rest} className={rootClassName}>
+        <div className={classes.content}>
+          <div className={classes.details}>
+            <Typography className={classes.title} variant="body2">
+              TOTAL EVENTS
+            </Typography>
+            <Typography className={classes.value} variant="h3">
+              {(((this.props.stats || {}).events || {}).counts || {}).total}
+            </Typography>
+          </div>
+          <div className={classes.iconWrapper}>
+            $
+          </div>
+        </div>
+        <div className={classes.footer}>
+          <Typography className={classes.difference} variant="body2">
+            <ArrowDownwardIcon />
+            12%
+          </Typography>
+          <Typography className={classes.caption} variant="caption">
+            Since last month
+          </Typography>
+        </div>
+      </Paper>
+    );
+  }
+}
+
+EventsCounter.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+EventsCounter = withStyles(counterStyles)(EventsCounter);
+
+
 export class Dashboard extends Component {
   state = {
     apiKey: '',
@@ -163,46 +236,53 @@ export class Dashboard extends Component {
     selectedSubscription: null
   };
 
-  constructor() {
-    super()
-    this.addSubscription = this.addSubscription.bind(this);
-  }
-
   componentDidMount() {
     this.loadSubscriptions();
   }
 
-  loadSubscriptions() {
+  loadSubscriptions = () => {
     plansService.loadSubscriptions().then(subs => {
+      subs = subs.filter(sub => sub.plan.amount > 0);
       this.setState({subscriptions: subs});
+      if (subs.length > 0) {
+        this.setState({selectedSubscription: subs[0]});
+      }
       this.loadStats();
     });
   }
 
-  loadStats() {
-    eventsService.getStats(this.state.apiKey).then(stats => {
+  loadStats = (subscription) => {
+    subscription = subscription || this.state.selectedSubscription;
+    eventsService.getStats(subscription.metadata.api_key).then(stats => {
       this.setState({stats});
     });
   }
 
-  handleChange(name) {
+  handleChange = (name) => {
     return event => {
-      this.setState({ ...this.state, [name]: event.target.value });
-      this.loadStats()
-    }
+      const value = event.target.value;
+      if (name === 'subscriptionId' && value) {
+        const selected = this.state.subscriptions.filter(sub => sub.id === value)[0];
+        this.setState({ selectedSubscription: selected });
+        this.loadStats(selected);
+      } else {
+        this.setState({ ...this.state, [name]: value });
+      }
+    };
   }
 
-  hasSubscriptions() {
+  hasSubscriptions = () => {
     return this.state.subscriptions && this.state.subscriptions.length > 0;
   }
 
-  addSubscription() {
+  addSubscription = () => {
     return this.props.history.push('/settings');
   }
 
   render() {
     const { classes } = this.props;
-    const { apiKey } = this.state;
+    let { selectedSubscription } = this.state;
+    selectedSubscription = selectedSubscription || {};
 
     return (
       <DashboardLayout title="Dashboard">
@@ -218,20 +298,22 @@ export class Dashboard extends Component {
           </Paper>
         :
           <div>
-            Choose Subscription:
-            <Select className={classes.textField} onChange={this.handleChange('apiKey')}
-              label="API Key" margin="dense" required value={apiKey} variant="outlined">
-              {this.state.subscriptions.map(sub =>
-                <MenuItem key={sub.id} value={sub.metadata.license_key}>
-                  {`${sub.plan.name} (key ${sub.metadata.license_key})`}
-                </MenuItem>)}
-            </Select>
+            <div style={{marginBottom: '20px'}}>
+              Choose Subscription:
+              <Select className={classes.textField} onChange={this.handleChange('subscriptionId')}
+                label="API Key" value={selectedSubscription.id || ''} variant="outlined" style={{marginLeft: '20px'}}>
+                {this.state.subscriptions.map(sub =>
+                  <MenuItem key={sub.id} value={sub.id}>
+                    {`${sub.plan.name} (key ${sub.metadata.api_key})`}
+                  </MenuItem>)}
+              </Select>
+            </div>
             <Grid container spacing={4}>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
                 <ResourcesCounter className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <Users className={classes.item} />
+                <EventsCounter className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
                 <Progress className={classes.item} />
