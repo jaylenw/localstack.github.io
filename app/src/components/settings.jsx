@@ -52,10 +52,18 @@ const styles = theme => ({
 
 class CancelModal extends Component {
   state = {
-    closedRequest: null
+    closedRequest: null,
+    confirmDisabled: false
   }
   handleClose = () => {
     this.setState({closedRequest: this.props.request});
+  }
+  onConfirm = (event) => {
+    this.setState({confirmDisabled: true});
+    return this.props.onConfirm(event).then((res) => {
+      this.setState({confirmDisabled: false});
+      return this.handleClose();
+    });
   }
   isOpen = () => {
     return typeof this.props.request !== 'undefined' && this.state.closedRequest !== this.props.request;
@@ -101,8 +109,11 @@ class CancelModal extends Component {
             </div>
           </PortletContent>
           <PortletFooter className={classes.portletFooter}>
-            <Button color="primary" variant="contained" onClick={this.props.onConfirm}>
+            <Button color="primary" variant="contained" disabled={this.state.confirmDisabled} onClick={this.onConfirm}>
               Confirm Deletion
+            </Button>
+            <Button color="primary" variant="outlined" style={{float: 'right'}} onClick={this.handleClose}>
+              Close
             </Button>
           </PortletFooter>
         </Portlet>
@@ -139,7 +150,7 @@ class SubscriptionsList extends Component {
     this.setState({cancelRequest: Math.random(), activeSubscription: subscription});
   }
   confirmCancellation = () => {
-    plansService.cancelSubscription(this.state.activeSubscription).then(
+    return plansService.cancelSubscription(this.state.activeSubscription).then(
       () => {
         this.setState({cancelRequest: null, activeSubscription: null});
         this.loadSubscriptions();

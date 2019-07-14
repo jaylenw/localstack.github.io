@@ -10,7 +10,6 @@ export class EventsService extends BaseService {
             api_key: apiKey
         };
         return axios.post(this.url('events/stats'), data, this.getAuthHeaders()).then((res) => {
-            console.log(res.data);
             return res.data;
         });
     }

@@ -47,34 +47,41 @@ import {
 import { eventsService } from '../services/events';
 import { plansService } from '../services/plans';
 
-const EVENT_TYPES_CREATION = ['s3.cb', 'ddb.ct', 'kns.cs'];
-
+const EVENT_TYPES_CREATION = [
+  's3.cb', 'ddb.ct', 'kns.cs', 'lmb.cf', 'sqs.cq'
+];
+const SERVICE_CODES = {
+  's3': 'S3',
+  'ddb': 'DynamoDB',
+  'kns': 'Kinesis',
+  'inf': 'Infrastructure',
+  'lmb': 'Lambda',
+  'sqs': 'SQS'
+};
+const ACTION_TYPES = {
+  's3.cb': 'Create bucket',
+  'inf.up': 'Start up',
+  'inf.dn': 'Shut down',
+  'ddb.ct': 'Create table',
+  'ddb.dt': 'Delete table',
+  'kns.cs': 'Create stream',
+  'kns.ds': 'Delete stream',
+  'lmb.cf': 'Create function',
+  'lmb.df': 'Delete function',
+  'sqs.cq': 'Create queue',
+  'sqs.dq': 'Delete queue'
+};
 
 class EventsList extends Component {
-
     state = {
       isLoading: true
     };
-
     getResource = (eventType) => {
       const resource = eventType.split('.')[0];
-      const resources = {
-        's3': 'S3',
-        'ddb': 'DynamoDB',
-        'kns': 'Kinesis',
-        'inf': 'Infrastructure'
-      }
-      return resources[resource] || `Generic (${eventType})`;
+      return SERVICE_CODES[resource] || `Generic (${eventType})`;
     }
     getAction = (eventType) => {
-      const actions = {
-        's3.cb': 'Create bucket',
-        'inf.up': 'Start up',
-        'inf.dn': 'Shut down',
-        'ddb.ct': 'Create table',
-        'kns.cs': 'Create stream'
-      }
-      return actions[eventType];
+      return ACTION_TYPES[eventType];
     }
 
     render() {
@@ -139,22 +146,13 @@ EventsList.propTypes = {
 EventsList = withStyles({})(EventsList);
 
 class ResourcesStats extends Component {
-
     state = {
       isLoading: true
     };
-
     getResource = (eventType) => {
       const resource = eventType.split('.')[0];
-      const resources = {
-        's3': 'S3',
-        'ddb': 'DynamoDB',
-        'kns': 'Kinesis',
-        'inf': 'Infrastructure'
-      }
-      return resources[resource] || `Generic (${eventType})`;
+      return SERVICE_CODES[resource] || `Generic (${eventType})`;
     }
-
     render() {
         const { classes } = this.props;
         const statsEvents = (this.props.stats || {}).events;

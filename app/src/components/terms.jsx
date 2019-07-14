@@ -10,6 +10,8 @@ import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layou
 // Shared components
 import { Paper } from 'react-material-dashboard/src/components';
 
+import terms from '../assets/terms';
+
 const styles = theme => ({
   root: {
     padding: theme.spacing(3)
@@ -25,8 +27,7 @@ export default class TermsOfService extends Component {
           <DashboardLayout title="Terms">
             <div className={classes.root}>
               <Paper style={{textAlign: 'center', padding: '20px'}}>
-                <h2>Terms and Conditions</h2>
-                Coming soon.
+                {terms}
               </Paper>
             </div>
           </DashboardLayout>

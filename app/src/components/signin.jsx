@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { usersService } from '../services/users';
 
 // Material components
@@ -8,14 +10,28 @@ import {
   Grid,
   Button,
   IconButton,
+  Modal,
   CircularProgress,
   TextField,
   Checkbox,
   Typography
 } from '@material-ui/core';
 
+import {
+  Portlet,
+  PortletHeader,
+  PortletLabel,
+  PortletContent,
+  PortletFooter
+} from 'react-material-dashboard/src/components';
+
+// Material helpers
+import { withStyles } from '@material-ui/core';
+
 // Material icons
 import { ArrowBack as ArrowBackIcon } from '@material-ui/icons';
+
+import terms from '../assets/terms';
 
 const leftPanel = (classes) => (
   <Grid className={classes.quoteWrapper} item lg={5}>
@@ -37,8 +53,53 @@ const sharedStyles = {
     quoteText: {
         color: '#000',
         marginTop: '20px'
+    },
+    modal: {
+      width: '50%',
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)'
     }
 };
+
+export class TermsConditions extends Component {
+  state = {
+    closedRequest: null
+  }
+  isOpen = () => {
+    return typeof this.props.request !== 'undefined' && this.state.closedRequest !== this.props.request;
+  }
+  handleClose = () => {
+    this.setState({closedRequest: this.props.request});
+  }
+  render() {
+    const { classes, className } = this.props;
+    const modalClassName = classNames(classes.modal, className);
+    return (
+      <Modal open={this.isOpen()} onClose={this.handleClose}>
+        <Portlet className={modalClassName}>
+          <PortletHeader>
+            <PortletLabel title="Terms and Conditions"/>
+          </PortletHeader>
+          <PortletContent>
+            {terms}
+          </PortletContent>
+          <PortletFooter className={classes.portletFooter}>
+            <Button color="primary" variant="contained" onClick={this.handleClose}>Close</Button>
+          </PortletFooter>
+        </Portlet>
+      </Modal>
+    );
+  }
+}
+
+TermsConditions.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+TermsConditions = withStyles(sharedStyles)(TermsConditions);
+
 
 export const defineSignInComponent = (OriginalSignIn) => {
     class SignIn extends OriginalSignIn {
@@ -154,6 +215,9 @@ export const defineSignUpComponent = (OriginalSignUp) => {
             }
             this.setState({isLoading: false});
         };
+        showTaC = () => {
+          this.setState({showTaC: Math.random()})
+        };
 
         render() {
           const { classes } = this.props;
@@ -165,13 +229,12 @@ export const defineSignUpComponent = (OriginalSignUp) => {
             touched.lastName && errors.lastName ? errors.lastName[0] : false;
           const showEmailError =
             touched.email && errors.email ? errors.email[0] : false;
-          const showPasswordError =
-            touched.password && errors.password ? errors.password[0] : false;
           const showPolicyError =
             touched.policy && errors.policy ? errors.policy[0] : false;
 
           return (
             <div className={classes.root}>
+              <TermsConditions request={this.state.showTaC}/>
               <Grid className={classes.grid} container>
                 {leftPanel(classes)}
                 <Grid className={classes.content} item lg={7} xs={12}>
@@ -219,18 +282,13 @@ export const defineSignUpComponent = (OriginalSignUp) => {
                           <TextField className={classes.textField} label="Password"
                             onChange={event => this.handleFieldChange('password', event.target.value)}
                             type="password" value={values.password} variant="outlined"/>
-                          {showPasswordError && (
-                            <Typography className={classes.fieldError} variant="body2">
-                              {errors.password[0]}
-                            </Typography>
-                          )}
                           <div className={classes.policy}>
                             <Checkbox checked={values.policy} className={classes.policyCheckbox}
                               color="primary" name="policy"
                               onChange={() => this.handleFieldChange('policy', !values.policy)}/>
                             <Typography className={classes.policyText} variant="body1">
                               I have read the &nbsp;
-                              <Link className={classes.policyUrl} to="#">
+                              <Link className={classes.policyUrl} to="#" onClick={this.showTaC}>
                                 Terms and Conditions
                               </Link>
                               .

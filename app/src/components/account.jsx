@@ -22,6 +22,7 @@ import { default as detailsStyles } from 'react-material-dashboard/src/views/Acc
 
 // Material components
 import {
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -143,7 +144,8 @@ export class AccountDetails extends Component {
       email: metadata.email || '',
       country: metadata.country || '',
       address: metadata.address || '',
-      phone: metadata.phone || ''
+      phone: metadata.phone || '',
+      metadata: metadata
     };
     this.setState(this.state);
   }
@@ -158,8 +160,8 @@ export class AccountDetails extends Component {
   render() {
     const { classes, className, dispatch, ...rest } = this.props;
     const { firstname, lastname, phone, address, country, email } = this.state;
-
     const rootClassName = classNames(classes.root, className);
+    const isLoading = !this.state.metadata;
 
     return (
       <Portlet {...rest} className={rootClassName}>
@@ -167,6 +169,13 @@ export class AccountDetails extends Component {
         <PortletHeader>
           <PortletLabel subtitle="Update your personal details below" title="Profile"/>
         </PortletHeader>
+        {isLoading && (
+          <div className={classes.progressWrapper + ' centeredPanel'}>
+            <CircularProgress />
+          </div>
+        )}
+        {!isLoading &&
+        <>
         <PortletContent noPadding>
           <div className={classes.field}>
             <TextField className={classes.textField} onChange={this.handleChange('firstname')}
@@ -193,6 +202,8 @@ export class AccountDetails extends Component {
           </Button>
           <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
         </PortletFooter>
+        </>
+        }
         </form>
       </Portlet>
     );
