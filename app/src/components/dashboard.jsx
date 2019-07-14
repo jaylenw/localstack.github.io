@@ -47,7 +47,10 @@ import {
 import { eventsService } from '../services/events';
 import { plansService } from '../services/plans';
 
-class ResourcesList extends Component {
+const EVENT_TYPES_CREATION = ['s3.cb', 'ddb.ct', 'kns.cs'];
+
+
+class EventsList extends Component {
 
     state = {
       isLoading: true
@@ -129,20 +132,90 @@ class ResourcesList extends Component {
     }
 }
 
-ResourcesList.propTypes = {
+EventsList.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-ResourcesList = withStyles({})(ResourcesList);
+EventsList = withStyles({})(EventsList);
+
+class ResourcesStats extends Component {
+
+    state = {
+      isLoading: true
+    };
+
+    getResource = (eventType) => {
+      const resource = eventType.split('.')[0];
+      const resources = {
+        's3': 'S3',
+        'ddb': 'DynamoDB',
+        'kns': 'Kinesis',
+        'inf': 'Infrastructure'
+      }
+      return resources[resource] || `Generic (${eventType})`;
+    }
+
+    render() {
+        const { classes } = this.props;
+        const statsEvents = (this.props.stats || {}).events;
+        const isLoading = typeof statsEvents === 'undefined';
+        const allEventCounts = ((statsEvents && statsEvents.counts) || {}).event_types || {};
+        const eventCounts = Object.keys(allEventCounts)
+          .filter( key => EVENT_TYPES_CREATION.includes(key) )
+          .reduce( (res, key) => {res[key] = allEventCounts[key]; return res}, {} );
+        const showCounts = !isLoading && Object.keys(eventCounts).length > 0;
+
+        return (
+          <Portlet>
+            <PortletHeader>
+              <PortletLabel title="Resource Stats"/>
+            </PortletHeader>
+            <PortletContent noPadding>
+              {isLoading && (
+                <div className={classes.progressWrapper + ' centeredPanel'}>
+                  <CircularProgress />
+                </div>
+              )}
+              {showCounts && (
+                <Table className='compactTable'>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Resource</TableCell>
+                      <TableCell>Count</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Object.keys(eventCounts).map(key => (
+                      <TableRow className={classes.tableRow} hover key={key}>
+                        <TableCell>{this.getResource(key)}</TableCell>
+                        <TableCell>{eventCounts[key]}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+              {!isLoading && !showCounts &&
+                <div className={'centeredPanel'}>No events recorded yet.</div>
+              }
+            </PortletContent>
+          </Portlet>
+        );
+    }
+}
+
+ResourcesStats.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+ResourcesStats = withStyles({})(ResourcesStats);
 
 class ResourcesCounter extends Component {
-  EVENT_TYPES_CREATION = ['s3.cb', 'ddb.ct', 'kns.cs'];
 
   count = () => {
     const events = (this.props.stats || {}).events;
     if (!events || !events.counts.event_types) return 0;
     const result = Object.keys(events.counts.event_types).reduce((count, e) => {
-      const value = this.EVENT_TYPES_CREATION.includes(e) ? events.counts.event_types[e] : 0;
+      const value = EVENT_TYPES_CREATION.includes(e) ? events.counts.event_types[e] : 0;
       return value + count;
     }, 0);
     return result;
@@ -319,7 +392,10 @@ export class Dashboard extends Component {
                 <Progress className={classes.item} />
               </Grid>
               <Grid item lg={8} md={12} xl={8} xs={12}>
-                <ResourcesList className={classes.item} stats={(this.state || {}).stats} />
+                <EventsList className={classes.item} stats={(this.state || {}).stats} />
+              </Grid>
+              <Grid item lg={4} sm={6} xl={4} xs={12}>
+                <ResourcesStats className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
             </Grid>
           </div>

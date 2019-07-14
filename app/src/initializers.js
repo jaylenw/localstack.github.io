@@ -13,6 +13,8 @@ const resolveComponent = (className, componentClass) => {
         return require('./components/account').Account;
     if(className === 'AccountDetails')
         return require('./components/account').AccountDetails;
+    if(className === 'Password')
+        return require('./components/account').Password;
     if(className === 'Settings')
         return require('./components/settings').Settings;
     if(className === 'SignIn')

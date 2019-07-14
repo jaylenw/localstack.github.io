@@ -7,8 +7,9 @@ export class UsersService extends BaseService {
 
     signin(username, password) {
         const data = {username, password};
-        return axios.post(this.url('user/signin'), data).then((res) => {
-            return res.data;
+        return axios.post(this.url('user/signin'), data).then((result) => {
+            localStorage.setItem('userInfo', JSON.stringify(result.data));
+            return result.data;
         });
     }
     signup(firstname, lastname, email, password) {
@@ -21,6 +22,9 @@ export class UsersService extends BaseService {
         return axios.get(this.url(), this.getAuthHeaders()).then((res) => {
             return res.data;
         });
+    }
+    getLocalUserDetails() {
+        return JSON.parse(localStorage.getItem('userInfo'));
     }
     getUserName() {
         const userInfo = this.getUserInfo();
@@ -43,6 +47,12 @@ export class UsersService extends BaseService {
         return axios.post(this.url('user/cards'), card, this.getAuthHeaders()).then((res) => {
             return res.data;
         });
+    }
+    updatePassword(password) {
+        const details = { password };
+        return this.saveUserDetails(details).then(
+          (res) => this.signin(this.getLocalUserDetails().email, password)
+        );
     }
 }
 

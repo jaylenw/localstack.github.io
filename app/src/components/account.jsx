@@ -32,18 +32,92 @@ import {
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
 
-// Custom components
-import { Password } from 'react-material-dashboard/src/views/Settings/components';
-
 // Material components
 import { Button, TextField, Grid } from '@material-ui/core';
 
 // Component styles
 const styles = theme => ({
   root: {
-    padding: theme.spacing(4)
+
+  },
+  textField: {
+    width: '100%'
+  },
+  portletFooter: {
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   }
 });
+
+export class Password extends Component {
+  state = {
+    password: '',
+    confirm: '',
+    updating: false
+  };
+
+  handleChange = name => event => {
+    this.setState({ ...this.state, [name]: event.target.value });
+  };
+
+  isValidPassword = (password) => {
+    return password.match(/^\S{7,}/g);
+  };
+
+  savePassword = () => {
+    this.setState({ message: '', errorMessage: '' });
+    const password = this.state.password;
+    if (password !== this.state.confirm) {
+      return this.setState({ errorMessage: 'Passwords do not match' });
+    }
+    if (!this.isValidPassword(password)) {
+      return this.setState({ errorMessage: 'Please choose a more complex password' });
+    }
+    this.setState({updating: true});
+    usersService.updatePassword(password).then(
+      (result) => {
+        this.setState({ message: 'Password successfully updated',
+          password: '', confirm: '', updating: false });
+      }
+    )
+  };
+
+  render() {
+    const { classes, className, ...rest } = this.props;
+    const { password, confirm } = this.state;
+    const rootClassName = classNames(classes.root, className);
+
+    return (
+      <Portlet {...rest} className={rootClassName}>
+        <PortletHeader>
+          <PortletLabel subtitle="Update password" title="Password"/>
+        </PortletHeader>
+        <PortletContent>
+          <TextField className={classes.textField} type="password" onChange={this.handleChange('password')}
+            label="New password" margin="dense" required value={password} variant="outlined"/>
+          <TextField className={classes.textField} type="password" onChange={this.handleChange('confirm')}
+            label="Confirm password" margin="dense" required value={confirm} variant="outlined"/>
+        </PortletContent>
+        <PortletFooter className={classes.portletFooter}>
+          <Button color="primary" variant="contained" disabled={this.state.updating}
+            onClick={this.savePassword}>Update</Button>
+          <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
+          <div style={{marginTop: '10px', color: 'red'}}>{this.state.errorMessage}</div>
+        </PortletFooter>
+      </Portlet>
+    );
+  }
+}
+
+Password.propTypes = {
+  className: PropTypes.string,
+  classes: PropTypes.object.isRequired
+};
+
+Password = withStyles(styles)(Password);
+
 
 export class AccountDetails extends Component {
 

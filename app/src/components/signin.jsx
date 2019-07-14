@@ -48,7 +48,6 @@ export const defineSignInComponent = (OriginalSignIn) => {
                 const { history } = this.props;
                 const {values} = this.state;
                 const result = await usersService.signin(values.email, values.password);
-                localStorage.setItem('userInfo', JSON.stringify(result));
                 this.props.dispatch({type: 'USER_UPDATE', payload: result});
                 history.push('/dashboard');
             } catch (error) {
