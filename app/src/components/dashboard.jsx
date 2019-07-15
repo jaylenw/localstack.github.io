@@ -22,19 +22,16 @@ import {
 
 // Material icons
 import {
-  ArrowDownward as ArrowDownwardIcon
+  Event as EventsIcon,
+  LibraryAdd as ResourcesIcon,
+  CheckCircleOutline as CheckIcon
 } from '@material-ui/icons';
 
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
 
-import counterStyles from 'react-material-dashboard/src/views/Dashboard/components/Budget/styles';
-
 // Shared components
 import { Paper } from 'react-material-dashboard/src/components';
-
-// Custom components
-import { Progress } from 'react-material-dashboard/src/views/Dashboard/components';
 
 // Shared components
 import {
@@ -46,17 +43,58 @@ import {
 
 import { eventsService } from '../services/events';
 import { plansService } from '../services/plans';
+import { clone } from '../util';
+
+const counterStyles = (color) => (theme) => ({
+  root: {
+    padding: theme.spacing(2)
+  },
+  content: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  details: {},
+  title: {
+    color: theme.palette.text.secondary,
+    fontWeight: 700
+  },
+  value: {
+    marginTop: theme.spacing(1)
+  },
+  iconWrapper: {
+    alignItems: 'center',
+    backgroundColor: color,
+    borderRadius: '50%',
+    display: 'inline-flex',
+    height: '4rem',
+    justifyContent: 'center',
+    marginLeft: 'auto',
+    width: '4rem'
+  },
+  icon: {
+    color: theme.palette.common.white,
+    fontSize: '2rem',
+    height: '2rem',
+    width: '2rem'
+  },
+  footer: {
+    marginTop: theme.spacing(3)
+  }
+});
 
 const EVENT_TYPES_CREATION = [
-  's3.cb', 'ddb.ct', 'kns.cs', 'lmb.cf', 'sqs.cq'
+  's3.cb', 'ddb.ct', 'kns.cs', 'lmb.cf', 'sqs.cq', 'sns.ct', 'stf.cm', 'agw.ca'
 ];
 const SERVICE_CODES = {
-  's3': 'S3',
-  'ddb': 'DynamoDB',
-  'kns': 'Kinesis',
   'inf': 'Infrastructure',
+  's3': 'S3',
+  'ddb': 'Dynamo DB',
+  'kns': 'Kinesis',
   'lmb': 'Lambda',
-  'sqs': 'SQS'
+  'sqs': 'SQS',
+  'sns': 'SNS',
+  'stf': 'Step Functions',
+  'agw': 'API Gateway'
 };
 const ACTION_TYPES = {
   's3.cb': 'Create bucket',
@@ -69,7 +107,13 @@ const ACTION_TYPES = {
   'lmb.cf': 'Create function',
   'lmb.df': 'Delete function',
   'sqs.cq': 'Create queue',
-  'sqs.dq': 'Delete queue'
+  'sqs.dq': 'Delete queue',
+  'sns.ct': 'Create topic',
+  'sns.dt': 'Delete topic',
+  'stf.cm': 'Create state machine',
+  'stf.dm': 'Delete state machine',
+  'agw.ca': 'Create REST API',
+  'agw.da': 'Delete REST API'
 };
 
 class EventsList extends Component {
@@ -183,7 +227,9 @@ class ResourcesStats extends Component {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.keys(eventCounts).map(key => (
+                    {Object.keys(eventCounts)
+                      .sort((k1, k2) => (eventCounts[k2] - eventCounts[k1]))
+                      .map(key => (
                       <TableRow className={classes.tableRow} hover key={key}>
                         <TableCell>{this.getResource(key)}</TableCell>
                         <TableCell>{eventCounts[key]}</TableCell>
@@ -207,8 +253,39 @@ ResourcesStats.propTypes = {
 
 ResourcesStats = withStyles({})(ResourcesStats);
 
-class ResourcesCounter extends Component {
+class BaseCounter extends Component {
+  icon = EventsIcon;
+  count = () => {
+    return 0;
+  }
+  render() {
+    const { classes, className, ...rest } = this.props;
+    const { title } = this;
+    const rootClassName = classNames(classes.root, className);
+    return (
+      <Paper {...rest} className={rootClassName}>
+        <div className={classes.content}>
+          <div className={classes.details}>
+            <Typography className={classes.title} variant="body2">{title}</Typography>
+            <Typography className={classes.value} variant="h3">{this.count()}</Typography>
+          </div>
+          <div className={classes.iconWrapper}>
+            {React.createElement(this.icon, {className: classes.icon})}
+          </div>
+        </div>
+      </Paper>
+    );
+  }
+}
 
+BaseCounter.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+
+class ResourcesCounter extends BaseCounter {
+  title = 'RESOURCES CREATED';
+  icon = ResourcesIcon;
   count = () => {
     const events = (this.props.stats || {}).events;
     if (!events || !events.counts.event_types) return 0;
@@ -218,86 +295,30 @@ class ResourcesCounter extends Component {
     }, 0);
     return result;
   }
+}
 
-  render() {
-    const { classes, className, ...rest } = this.props;
-    const rootClassName = classNames(classes.root, className);
+ResourcesCounter = withStyles(counterStyles('green'))(ResourcesCounter);
 
-    return (
-      <Paper {...rest} className={rootClassName}>
-        <div className={classes.content}>
-          <div className={classes.details}>
-            <Typography className={classes.title} variant="body2">
-              RESOURCES CREATED
-            </Typography>
-            <Typography className={classes.value} variant="h3">
-              {this.count()}
-            </Typography>
-          </div>
-          <div className={classes.iconWrapper}>
-            $
-          </div>
-        </div>
-        <div className={classes.footer}>
-          <Typography className={classes.difference} variant="body2">
-            <ArrowDownwardIcon />
-            12%
-          </Typography>
-          <Typography className={classes.caption} variant="caption">
-            Since last month
-          </Typography>
-        </div>
-      </Paper>
-    );
+
+class EventsCounter extends BaseCounter {
+  title = 'TOTAL EVENTS';
+  count = () => {
+    return (((this.props.stats || {}).events || {}).counts || {}).total;
   }
 }
 
-ResourcesCounter.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
-ResourcesCounter = withStyles(counterStyles)(ResourcesCounter);
+EventsCounter = withStyles(counterStyles('#0767DB'))(EventsCounter);
 
 
-class EventsCounter extends Component {
-  render() {
-    const { classes, className, ...rest } = this.props;
-    const rootClassName = classNames(classes.root, className);
-
-    return (
-      <Paper {...rest} className={rootClassName}>
-        <div className={classes.content}>
-          <div className={classes.details}>
-            <Typography className={classes.title} variant="body2">
-              TOTAL EVENTS
-            </Typography>
-            <Typography className={classes.value} variant="h3">
-              {(((this.props.stats || {}).events || {}).counts || {}).total}
-            </Typography>
-          </div>
-          <div className={classes.iconWrapper}>
-            $
-          </div>
-        </div>
-        <div className={classes.footer}>
-          <Typography className={classes.difference} variant="body2">
-            <ArrowDownwardIcon />
-            12%
-          </Typography>
-          <Typography className={classes.caption} variant="caption">
-            Since last month
-          </Typography>
-        </div>
-      </Paper>
-    );
+class SuccessCounter extends BaseCounter {
+  title = 'SUCCESSFUL API CALLS';
+  icon = CheckIcon;
+  count = () => {
+    return '100 %';
   }
 }
 
-EventsCounter.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
-EventsCounter = withStyles(counterStyles)(EventsCounter);
+SuccessCounter = withStyles(counterStyles('orange'))(SuccessCounter);
 
 
 export class Dashboard extends Component {
@@ -314,6 +335,15 @@ export class Dashboard extends Component {
   loadSubscriptions = () => {
     plansService.loadSubscriptions().then(subs => {
       subs = subs.filter(sub => sub.plan.amount > 0);
+      subs = subs.reduce((result, sub) => {
+        JSON.parse(sub.metadata.api_keys).forEach(key => {
+          const subCopy = clone(sub);
+          subCopy.metadata.api_key = key;
+          result.push(subCopy);
+        });
+        return result;
+      }, []);
+
       this.setState({subscriptions: subs});
       if (subs.length > 0) {
         this.setState({selectedSubscription: subs[0]});
@@ -332,8 +362,8 @@ export class Dashboard extends Component {
   handleChange = (name) => {
     return event => {
       const value = event.target.value;
-      if (name === 'subscriptionId' && value) {
-        const selected = this.state.subscriptions.filter(sub => sub.id === value)[0];
+      if (name === 'apiKey' && value) {
+        const selected = this.state.subscriptions.filter(sub => sub.metadata.api_key === value)[0];
         this.setState({ selectedSubscription: selected });
         this.loadStats(selected);
       } else {
@@ -371,11 +401,12 @@ export class Dashboard extends Component {
           <div>
             <div style={{marginBottom: '20px'}}>
               Choose Subscription:
-              <Select className={classes.textField} onChange={this.handleChange('subscriptionId')}
-                label="API Key" value={selectedSubscription.id || ''} variant="outlined" style={{marginLeft: '20px'}}>
+              <Select className={classes.textField} onChange={this.handleChange('apiKey')}
+                label="API Key" value={(selectedSubscription.metadata || {}).api_key || ''}
+                variant="outlined" style={{marginLeft: '20px'}}>
                 {this.state.subscriptions.map(sub =>
-                  <MenuItem key={sub.id} value={sub.id}>
-                    {`${sub.plan.name} (key ${sub.metadata.api_key})`}
+                  <MenuItem key={sub.metadata.api_key} value={sub.metadata.api_key}>
+                    {`API Key ${sub.metadata.api_key} (${sub.plan.name})`}
                   </MenuItem>)}
               </Select>
             </div>
@@ -387,7 +418,7 @@ export class Dashboard extends Component {
                 <EventsCounter className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <Progress className={classes.item} />
+                <SuccessCounter className={classes.item} stats={(this.state || {}).stats} />
               </Grid>
               <Grid item lg={8} md={12} xl={8} xs={12}>
                 <EventsList className={classes.item} stats={(this.state || {}).stats} />

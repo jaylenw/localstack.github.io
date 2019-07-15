@@ -34,7 +34,8 @@ import {
   PortletHeader,
   PortletLabel,
   PortletContent,
-  PortletFooter
+  PortletFooter,
+  Paper
 } from 'react-material-dashboard/src/components';
 
 // Component styles
@@ -190,8 +191,11 @@ class SubscriptionsList extends Component {
                 </TableHead>
                 <TableBody>
                   {subscriptions.map(sub => (
-                    <TableRow className={classes.tableRow} hover key={sub.id}>
-                      <TableCell><Link>{sub.plan.name}</Link></TableCell>
+                    <TableRow className={classes.tableRow} hover key={sub.id}
+                        style={{backgroundColor: sub === this.props.selectedSubscription ? '#e7e9eb' : ''}} >
+                      <TableCell>
+                        <Link onClick={() => this.props.selectSubscription(sub)}>{sub.plan.name}</Link>
+                      </TableCell>
                       <TableCell>{sub.plan.amount} USD / month</TableCell>
                       <TableCell>{sub.quantity}</TableCell>
                       <TableCell>{sub.plan.amount * sub.quantity} USD / month</TableCell>
@@ -380,35 +384,89 @@ SubscriptionCreate = compose(withRouter, withStyles(styles))(SubscriptionCreate)
 
 class ApiKeys extends Component {
   state = {
-    apiKey: ''
+    storing: false
   };
-
-  fetchKey() {
-    console.log('fetchKey')
+  getKeyMapping = () => {
+    const sub = this.props.selectedSubscription;
+    if (!sub) return [];
+    if (this.state.selectedSubscription !== sub) {
+      this.setState({selectedSubscription: sub, message: ''});
+    }
+    const keys = JSON.parse(sub.metadata.api_keys);
+    const keyMapping = JSON.parse(sub.metadata.api_keys_mapping || '{}');
+    keys.forEach((key) => {keyMapping[key] = keyMapping[key] || ''});
+    return keyMapping;
   }
-
+  handleChange = (key) => (event) => {
+    const sub = this.props.selectedSubscription;
+    const mapping = this.getKeyMapping();
+    mapping[key] = event.target.value;
+    sub.metadata.api_keys_mapping = JSON.stringify(mapping);
+    this.setState({selectedSubscription: sub});
+  }
+  storeMapping = () => {
+    this.setState({storing: true, message: ''});
+    const sub = this.props.selectedSubscription;
+    const data = {api_keys_mapping: sub.metadata.api_keys_mapping};
+    plansService.updateSubscription(sub, data).then(
+      (result) => this.setState({message: 'Details successfully saved'})
+    ).finally(
+      (result) => this.setState({storing: false})
+    );
+  }
   render() {
-    const { classes, className, ...rest } = this.props;
+    const { classes, className } = this.props;
     const rootClassName = classNames(classes.root, className);
+    const keyMapping = this.getKeyMapping();
 
     return (
-      <Portlet {...rest} className={rootClassName}>
+      <Portlet className={rootClassName}>
         <form autoComplete="off" noValidate onSubmit={this.saveUser}>
         <PortletHeader>
-          <PortletLabel subtitle="Configure your environment" title="API Key"/>
+          <PortletLabel title="Subscription Details"/>
         </PortletHeader>
+        {!!this.props.selectedSubscription && <>
         <PortletContent>
-          <div>
-          <code><pre>
-            export LOCALSTACK_API_KEY={this.state.apiKey}
-          </pre></code>
-          </div>
+          Configure your environment using the API key(s) in the table below. Example:
+          <Paper style={{textAlign: 'center', padding: '15px', background: '#f0f5f9', marginBottom: '10px'}}>
+            <code><pre>
+              export LOCALSTACK_API_KEY=key_123
+            </pre></code>
+          </Paper>
+          <hr/>
+          <p style={{marginTop: '10px'}}>
+            You can use the list below to keep track of who is using your API keys.
+          </p>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>API Key</TableCell>
+                <TableCell>User</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+            {Object.keys(keyMapping).map((key, idx) =>
+              <TableRow key={key}>
+                <TableCell style={{padding: '8px'}}><b>{key}</b></TableCell>
+                <TableCell style={{padding: '8px'}}>
+                  <TextField className={classes.textField + ' compactInput'} variant="outlined"
+                  onChange={this.handleChange(key)} margin="dense" value={keyMapping[key]}/>
+                </TableCell>
+              </TableRow>
+            )}
+            </TableBody>
+          </Table>
+          <p style={{marginTop: '10px'}}>
+            (Note: This info is for your reference only, and has no impact on the pricing or billing.)
+          </p>
         </PortletContent>
-        <PortletFooter className={classes.portletFooter}>
-          <Button color="primary" variant="contained" onClick={this.fetchKey}>
-            Fetch Key
+        <PortletFooter>
+          <Button color="primary" variant="contained" disabled={this.state.storing} onClick={this.storeMapping}>
+            Save Details
           </Button>
+          <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
         </PortletFooter>
+        </>}
         </form>
       </Portlet>
     );
@@ -416,7 +474,8 @@ class ApiKeys extends Component {
 }
 
 ApiKeys.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
+  selectedSubscription: PropTypes.object
 };
 
 ApiKeys = withStyles(styles)(ApiKeys);
@@ -424,14 +483,14 @@ ApiKeys = withStyles(styles)(ApiKeys);
 
 export class Settings extends Component {
   state = {
-    newSubscription: false
+    newSubscription: false,
+    selectedSubscription: null
   }
-  constructor() {
-    super();
-    this.newSubscription = this.newSubscription.bind(this);
-  }
-  newSubscription() {
+  newSubscription = () => {
     this.setState({newSubscription: true});
+  }
+  selectSubscription = (sub) => {
+    this.setState({selectedSubscription: sub});
   }
   render() {
     const { classes } = this.props;
@@ -445,10 +504,12 @@ export class Settings extends Component {
             </Grid> :
             <>
             <Grid item md={7} xs={12}>
-              <SubscriptionsList newSubscription={this.newSubscription} />
+              <SubscriptionsList newSubscription={this.newSubscription}
+                selectSubscription={this.selectSubscription}
+                selectedSubscription={this.state.selectedSubscription} />
             </Grid>
             <Grid item md={5} xs={12}>
-              <ApiKeys />
+              <ApiKeys selectedSubscription={this.state.selectedSubscription} />
             </Grid>
             </>
             }

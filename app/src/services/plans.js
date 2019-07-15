@@ -26,6 +26,11 @@ export class PlansService extends BaseService {
             (res) => res.data
         );
     }
+    updateSubscription(sub, data) {
+        return axios.post(this.url(`plans/subscriptions/${sub.id}`), data, this.getAuthHeaders()).then(
+            (res) => res.data
+        );
+    }
 }
 
 export const plansService = new PlansService();
