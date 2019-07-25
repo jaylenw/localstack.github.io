@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ReactMarkdown from 'react-markdown';
 
 // Material components
 import { withStyles } from '@material-ui/core';
@@ -10,13 +11,15 @@ import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layou
 // Shared components
 import { Paper } from 'react-material-dashboard/src/components';
 
-import terms from '../assets/terms';
+/* eslint import/no-webpack-loader-syntax: 0 */
+import markdown from '!!raw-loader!../assets/terms.md';
 
 const styles = theme => ({
   root: {
     padding: theme.spacing(3)
   }
 });
+
 
 
 export default class TermsOfService extends Component {
@@ -26,8 +29,8 @@ export default class TermsOfService extends Component {
         return (
           <DashboardLayout title="Terms">
             <div className={classes.root}>
-              <Paper style={{textAlign: 'center', padding: '20px'}}>
-                {terms}
+              <Paper style={{padding: '30px'}}>
+                <ReactMarkdown source={markdown} className={'markdown-body'}/>
               </Paper>
             </div>
           </DashboardLayout>

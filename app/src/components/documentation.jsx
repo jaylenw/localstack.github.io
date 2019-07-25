@@ -20,7 +20,7 @@ import {
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
 
 /* eslint import/no-webpack-loader-syntax: 0 */
-import markdown from '!!raw-loader!./documentation.md';
+import markdown from '!!raw-loader!../assets/documentation.md';
 
 // Component styles
 const styles = theme => ({
@@ -49,7 +49,7 @@ class DocumentationView extends Component {
       <DashboardLayout title="Documentation">
         <div style={{fontSize: '1px'}}>&nbsp;</div>
         <Portlet {...rest} className={rootClassName}>
-          <PortletContent className={'markdown-body'}>
+          <PortletContent>
             <ReactMarkdown source={markdown} className={'markdown-body'}/>
           </PortletContent>
         </Portlet>
