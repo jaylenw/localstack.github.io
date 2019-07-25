@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink as NavLinkOrig } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
@@ -17,8 +17,11 @@ import {
 import {
   DashboardOutlined as DashboardIcon,
   AccountBoxOutlined as AccountBoxIcon,
+  BookOutlined as DocumentationIcon,
   SettingsOutlined as SettingsIcon
 } from '@material-ui/icons';
+
+const NavLink = React.forwardRef((props, ref) => <NavLinkOrig innerRef={ref} {...props} />);
 
 export class Sidebar extends React.Component {
 
@@ -54,6 +57,13 @@ export class Sidebar extends React.Component {
                   <AccountBoxIcon />
                 </ListItemIcon>
                 <ListItemText classes={{ primary: classes.listItemText }} primary="Account"/>
+              </ListItem>
+              <ListItem activeClassName={classes.activeListItem}
+                className={classes.listItem} component={NavLink} to="/docs">
+                <ListItemIcon className={classes.listItemIcon}>
+                  <DocumentationIcon />
+                </ListItemIcon>
+                <ListItemText classes={{ primary: classes.listItemText }} primary="Documentation"/>
               </ListItem>
               <ListItem activeClassName={classes.activeListItem}
                 className={classes.listItem} component={NavLink} to="/settings">

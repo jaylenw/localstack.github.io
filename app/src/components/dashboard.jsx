@@ -17,6 +17,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TablePagination,
   Select,
   Typography } from '@material-ui/core';
 
@@ -24,7 +25,8 @@ import {
 import {
   Event as EventsIcon,
   LibraryAdd as ResourcesIcon,
-  CheckCircleOutline as CheckIcon
+  CheckCircleOutline as CheckIcon,
+  MonetizationOn as MoneyIcon
 } from '@material-ui/icons';
 
 // Shared layouts
@@ -98,6 +100,7 @@ const SERVICE_CODES = {
 };
 const ACTION_TYPES = {
   's3.cb': 'Create bucket',
+  's3.db': 'Delete bucket',
   'inf.up': 'Start up',
   'inf.dn': 'Shut down',
   'ddb.ct': 'Create table',
@@ -106,6 +109,7 @@ const ACTION_TYPES = {
   'kns.ds': 'Delete stream',
   'lmb.cf': 'Create function',
   'lmb.df': 'Delete function',
+  'lmb.if': 'Invoke function',
   'sqs.cq': 'Create queue',
   'sqs.dq': 'Delete queue',
   'sns.ct': 'Create topic',
@@ -117,20 +121,40 @@ const ACTION_TYPES = {
 };
 
 class EventsList extends Component {
+    ITEMS_PER_PAGE = 20;
     state = {
-      isLoading: true
+      isLoading: true,
+      page: 0,
+      stats: null
     };
+    componentDidMount() {
+      this.setState({stats: this.props.stats});
+    }
+    componentWillUpdate(nextProps, nextState) {
+      if (this.props.stats !== nextProps.stats) {
+        this.setState({page: 0});
+      }
+    }
     getResource = (eventType) => {
       const resource = eventType.split('.')[0];
       return SERVICE_CODES[resource] || `Generic (${eventType})`;
-    }
+    };
     getAction = (eventType) => {
       return ACTION_TYPES[eventType];
-    }
+    };
+    onChangePage = (event, page) => {
+      const subscription = this.props.selectedSubscription;
+      eventsService.getStats(subscription.metadata.api_key, page * this.ITEMS_PER_PAGE).then(
+        (stats) => {
+          this.props.updateStats(stats);
+          this.setState({page: page});
+        }
+      );
+    };
 
     render() {
         const { classes, className } = this.props;
-        const statsEvents = (this.props.stats || {}).events;
+        const statsEvents = (this.state.stats || this.props.stats || {}).events;
         const isLoading = typeof statsEvents === 'undefined';
         const events = (statsEvents && statsEvents.latest) || [];
 
@@ -149,30 +173,42 @@ class EventsList extends Component {
                 </div>
               )}
               {showEvents && (
-                <Table className='compactTable'>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Server Time</TableCell>
-                      <TableCell>Resource</TableCell>
-                      <TableCell>Action</TableCell>
-                      <TableCell>Machine ID</TableCell>
-                      <TableCell>Process ID</TableCell>
-                      <TableCell>Payload</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {events.map(item => (
-                      <TableRow className={classes.tableRow} hover key={item.e_t + item.s_t + item.p}>
-                        <TableCell>{item.s_t}</TableCell>
-                        <TableCell>{this.getResource(item.e_t)}</TableCell>
-                        <TableCell>{this.getAction(item.e_t)}</TableCell>
-                        <TableCell>{item.m_id}</TableCell>
-                        <TableCell>{item.p_id}</TableCell>
-                        <TableCell>{item.p}</TableCell>
+                <>
+                  <Table className='compactTable'>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Server Time</TableCell>
+                        <TableCell>Resource</TableCell>
+                        <TableCell>Action</TableCell>
+                        <TableCell>Machine ID</TableCell>
+                        <TableCell>Process ID</TableCell>
+                        <TableCell>Payload</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {events.map(item => (
+                        <TableRow className={classes.tableRow} hover key={item.e_t + item.s_t + item.p}>
+                          <TableCell>{item.s_t}</TableCell>
+                          <TableCell>{this.getResource(item.e_t)}</TableCell>
+                          <TableCell>{this.getAction(item.e_t)}</TableCell>
+                          <TableCell>{item.m_id}</TableCell>
+                          <TableCell>{item.p_id}</TableCell>
+                          <TableCell>{item.p}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <TablePagination
+                    backIconButtonProps={{'aria-label': 'Previous Page'}}
+                    nextIconButtonProps={{'aria-label': 'Next Page'}}
+                    component="div"
+                    count={statsEvents.counts.total}
+                    onChangePage={this.onChangePage}
+                    page={this.state.page}
+                    rowsPerPage={this.ITEMS_PER_PAGE}
+                    rowsPerPageOptions={[this.ITEMS_PER_PAGE]}
+                  />
+                </>
               )}
               {!isLoading && !showEvents &&
                 <div className={'centeredPanel'}>No events recorded yet.</div>
@@ -297,7 +333,7 @@ class ResourcesCounter extends BaseCounter {
   }
 }
 
-ResourcesCounter = withStyles(counterStyles('green'))(ResourcesCounter);
+ResourcesCounter = withStyles(counterStyles('violet'))(ResourcesCounter);
 
 
 class EventsCounter extends BaseCounter {
@@ -319,6 +355,20 @@ class SuccessCounter extends BaseCounter {
 }
 
 SuccessCounter = withStyles(counterStyles('orange'))(SuccessCounter);
+
+
+class SavingsCounter extends BaseCounter {
+  title = 'ESTIMATED COST SAVINGS';
+  icon = MoneyIcon;
+  count = () => {
+    let value = (((this.props.stats || {}).events || {}).savings || {}).total;
+    if (!value) return 'n/a';
+    value = (Math.round(value * 1000)/1000).toFixed(3);
+    return `${value} USD`;
+  }
+}
+
+SavingsCounter = withStyles(counterStyles('green'))(SavingsCounter);
 
 
 export class Dashboard extends Component {
@@ -351,14 +401,12 @@ export class Dashboard extends Component {
       this.loadStats();
     });
   }
-
   loadStats = (subscription) => {
     subscription = subscription || this.state.selectedSubscription;
     eventsService.getStats(subscription.metadata.api_key).then(stats => {
       this.setState({stats});
     });
   }
-
   handleChange = (name) => {
     return event => {
       const value = event.target.value;
@@ -371,13 +419,14 @@ export class Dashboard extends Component {
       }
     };
   }
-
   hasSubscriptions = () => {
     return this.state.subscriptions && this.state.subscriptions.length > 0;
   }
-
   addSubscription = () => {
     return this.props.history.push('/settings');
+  }
+  updateStats = (stats) => {
+    this.setState({stats});
   }
 
   render() {
@@ -411,20 +460,24 @@ export class Dashboard extends Component {
               </Select>
             </div>
             <Grid container spacing={4}>
-              <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <ResourcesCounter className={classes.item} stats={(this.state || {}).stats} />
+              <Grid item lg={3} sm={6} xl={4} xs={12}>
+                <ResourcesCounter className={classes.item} stats={this.state.stats} />
               </Grid>
-              <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <EventsCounter className={classes.item} stats={(this.state || {}).stats} />
+              <Grid item lg={3} sm={4} xl={3} xs={12}>
+                <EventsCounter className={classes.item} stats={this.state.stats} />
               </Grid>
-              <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <SuccessCounter className={classes.item} stats={(this.state || {}).stats} />
+              <Grid item lg={3} sm={4} xl={3} xs={12}>
+                <SuccessCounter className={classes.item} stats={this.state.stats} />
+              </Grid>
+              <Grid item lg={3} sm={4} xl={3} xs={12}>
+                <SavingsCounter className={classes.item} stats={this.state.stats} />
               </Grid>
               <Grid item lg={8} md={12} xl={8} xs={12}>
-                <EventsList className={classes.item} stats={(this.state || {}).stats} />
+                <EventsList className={classes.item} stats={this.state.stats}
+                    selectedSubscription={this.state.selectedSubscription} updateStats={this.updateStats} />
               </Grid>
               <Grid item lg={4} sm={6} xl={4} xs={12}>
-                <ResourcesStats className={classes.item} stats={(this.state || {}).stats} />
+                <ResourcesStats className={classes.item} stats={this.state.stats} />
               </Grid>
             </Grid>
           </div>

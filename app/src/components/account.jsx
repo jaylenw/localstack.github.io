@@ -258,13 +258,20 @@ export class AccountBilling extends Component {
       const { classes, className, ...rest } = this.props;
       const { cardNumber, expiryMonth, expiryYear, ccv } = this.state;
       const rootClassName = classNames(classes.root, className);
-
+      const isLoading = !this.state.currentCard;
       return (
         <Portlet {...rest} className={rootClassName}>
           <form autoComplete="off" noValidate onSubmit={this.savePayment}>
             <PortletHeader>
               <PortletLabel subtitle="Billing details listed below" title="Billing"/>
             </PortletHeader>
+            {isLoading && (
+              <div className={classes.progressWrapper + ' centeredPanel'}>
+                <CircularProgress />
+              </div>
+            )}
+            {!isLoading &&
+            <>
             <PortletContent noPadding>
               <div className={classes.field}>
                 {this.state.currentCard ?
@@ -281,6 +288,7 @@ export class AccountBilling extends Component {
                 }
               </div>
             </PortletContent>
+            </>}
             {this.state.newCard &&
             <>
               <PortletContent>

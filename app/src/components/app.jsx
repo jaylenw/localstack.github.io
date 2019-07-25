@@ -11,7 +11,7 @@ import Settings from 'react-material-dashboard/src/views/Settings';
 import SignUp from 'react-material-dashboard/src/views/SignUp';
 import SignIn from 'react-material-dashboard/src/views/SignIn';
 import NotFound from 'react-material-dashboard/src/views/NotFound';
-
+import Documentation from './documentation';
 import TermsOfService from './terms';
 
 // App
@@ -32,6 +32,7 @@ class Routes extends Component {
         <Route component={Account} exact path="/account"/>
         <Route component={Settings} exact path="/settings"/>
         <Route component={TermsOfService} exact path="/terms"/>
+        <Route component={Documentation} exact path="/docs"/>
         <Route component={SignUp} exact path="/sign-up"/>
         <Route component={SignIn} exact path="/sign-in"/>
         <Route component={NotFound} exact path="/not-found"/>
