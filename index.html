@@ -48,8 +48,6 @@
         <iframe src="https://ghbtns.com/github-btn.html?user=localstack&amp;repo=localstack&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20"></iframe>
       </div>
 
-
-
         <div class="value-prop row" style="text-align: center">
           <div class="four columns value-prop">
             <img class="value-img" style="width: 50px" src="images/flash.png">
@@ -73,13 +71,11 @@
       <div class="container">
         <ul class="navbar-list">
           <li class="navbar-item"><a class="navbar-link" href="#intro">Intro</a></li>
-          <li class="navbar-item">
+          <!-- <li class="navbar-item">
             <a class="navbar-link" href="#roadmap">Roadmap</a>
-          </li>
+          </li> -->
           <li class="navbar-item"><a class="navbar-link" href="#pricing">Pricing</a></li>
-          <li class="navbar-item">
-            <a class="navbar-link" href="#contact">Contact</a>
-          </li>
+          <li class="navbar-item"><a class="navbar-link" href="#contact">Contact</a></li>
         </ul>
       </div>
     </nav>
@@ -126,17 +122,20 @@
       </p>
     </div>
 
+    <!--
     <div class="docs-section" id="roadmap">
       <h6 class="docs-header">Roadmap</h6>
       <p>LocalStack is a very active project that is still under heavy development.
         This is the place where we will soon publish our roadmap. Please stay tuned.</p>
     </div>
+    -->
 
     <div class="docs-section" id="pricing">
       <h6 class="docs-header">Pricing</h6>
       <p>LocalStack comes in two flavors - as a free, open source <b>Base Edition</b>,
         and as a <b>Pro Edition</b> with extended features and support. See the table below for
-        a comparison.</p>
+        a comparison. If you need support for large organizations, please contact us for
+        the <b>Enterprise Edition</b>.</p>
       <p>We are strongly committed to our open source offering. Our philosophy is that today's
         best software is built by great people in an open collaboration, and therefore
         we will continue to contribute a majority of the features back to the Base Edition
@@ -152,6 +151,7 @@
               <th class="left">Feature</th>
               <th>Base Edition</th>
               <th>Pro Edition</th>
+              <th>Enterprise Edition</th>
             </tr>
           </thead>
           <tbody>
@@ -159,9 +159,11 @@
               <td class="left">Core AWS Services</td>
               <td>&#x2714;</td>
               <td>&#x2714;</td>
+              <td>&#x2714;</td>
             </tr>
             <tr>
               <td class="left">Community Updates</td>
+              <td>&#x2714;</td>
               <td>&#x2714;</td>
               <td>&#x2714;</td>
             </tr>
@@ -169,49 +171,64 @@
               <td class="left">Extended AWS Services</td>
               <td>-</td>
               <td>&#x2714;</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Support for Lambda Layers</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+              <td>&#x2714;</td>
             </tr>
             <tr>
               <td class="left">Updates / Bug Fixes</td>
               <td>occasionally</td>
               <td>frequently</td>
+              <td>on demand</td>
             </tr>
-            <tr>
-              <td class="left">CI Integration</td>
-              <td>-</td>
-              <td>&#x2714;</td>
-            </tr>
-            <tr>
+            <!-- <tr>
               <td class="left">Data Persistence</td>
               <td>-</td>
               <td>&#x2714; &#42;</td>
-            </tr>
+            </tr> -->
             <tr>
               <td class="left">CloudFormation Support</td>
-              <td>-</td>
-              <td>&#x2714; &#42;</td>
+              <td>basic</td>
+              <td>extended</td>
+              <td>on demand</td>
             </tr>
             <tr>
               <td class="left">Security (IAM/Cognito)</td>
-              <td>-</td>
-              <td>&#x2714; &#42;</td>
+              <td>basic</td>
+              <td>extended</td>
+              <td>on demand</td>
             </tr>
             <tr>
               <td class="left">Multi-Region Support</td>
               <td>-</td>
+              <td>&#x2714; &#42;</td>
               <td>&#x2714; &#42;</td>
             </tr>
             <tr>
               <td class="left">Test Report Dashboards</td>
               <td>-</td>
               <td>&#x2714; &#42;</td>
+              <td>&#x2714; &#42;</td>
             </tr>
             <tr>
               <td class="left">Resources/Cost Analysis</td>
               <td>-</td>
               <td>&#x2714; &#42;</td>
+              <td>&#x2714; &#42;</td>
             </tr>
             <tr>
-              <td class="left">Support</td>
+              <td class="left">Custom CI Integration</td>
+              <td>-</td>
+              <td>-</td>
+              <td>&#x2714;</td>
+            </tr>
+            <tr>
+              <td class="left">Personalized Support</td>
+              <td>-</td>
               <td>-</td>
               <td>&#x2714;</td>
             </tr>
@@ -219,11 +236,13 @@
               <td class="left">You're supporting the Project</td>
               <td>-</td>
               <td><span style="color:#ff0000; font-size: 20px; font-family: 'arial unicode MS', Arial">&hearts;</span></td>
+              <td><span style="color:#ff0000; font-size: 20px; font-family: 'arial unicode MS', Arial">&hearts;</span></td>
             </tr>
             <tr style="font-weight: bold;">
               <td class="left">Monthly Price</td>
               <td>Free</td>
               <td>Coming soon</td>
+              <td>Contact Us</td>
             </tr>
             <tr>
               <td></td>
@@ -235,12 +254,16 @@
                 <a class="button button-primary" href="#contact"
                   onClick="_gaq.push(['_trackEvent', 'localstack', 'signup'])">Stay Tuned!</a>
               </td>
+              <td>
+                <a class="button button-primary" href="#contact"
+                  onClick="mailto:info@localstack.cloud">Contact Us</a>
+              </td>
             </tr>
           </tbody>
         </table>
         <p style="font-size: 14px;">
           &#42; This feature is still under development. An early version is available, and
-          advanced power features will be added soon (see <a href="#roadmap">product roadmap</a>).
+          advanced power features will be added soon.
         </p>
       </div>
 
@@ -285,7 +308,7 @@
         <h7><b>Navigation</b></h7>
         <p style="font-size: 13px">
         <a href="#intro">Intro</a><br/>
-        <a href="#roadmap">Roadmap</a><br/>
+        <!-- <a href="#roadmap">Roadmap</a><br/> -->
         <a href="#pricing">Pricing</a><br/>
         <a href="#contact">Contact</a>
         </p>
