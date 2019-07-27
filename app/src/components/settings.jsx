@@ -256,13 +256,18 @@ class SubscriptionCreate extends Component {
   };
 
   createSubscription = () => {
-    this.setState({errorMessage: ''});
+    this.setState({errorMessage: '', saving: true});
     plansService.createSubscription(this.state.selectedPlan, this.state.quantity).then(
-      subs => this.props.history.push('/')
+      subs => {
+        alert('Subscription successfully added.');
+        this.props.history.push('/');
+      }
     ).catch((error) => {
-      this.setState({errorMessage: 'An error occurred and your request could not be processed. ' +
-        'Please check if your payment details are up to date in the account settings.'});
-    });
+      this.setState({errorMessage: 'Your request could not be processed. ' +
+        'Please update your payment details in the account settings.'});
+    }).finally(
+      () => this.setState({saving: false})
+    );
   };
 
   updateQuantity = event => {
@@ -355,7 +360,7 @@ class SubscriptionCreate extends Component {
                 &nbsp;<Link onClick={this.showTerms}>Terms and Conditions</Link> of this service.
               </div>
               <Button color="primary" variant="contained" onClick={this.createSubscription}
-                  disabled={!this.state.quantity || !this.state.accepted}>
+                  disabled={!this.state.quantity || !this.state.accepted || this.state.saving}>
                 Create Subscription
               </Button>
               <div style={{padding: '8px', color: 'red'}}>{this.state.errorMessage}</div>

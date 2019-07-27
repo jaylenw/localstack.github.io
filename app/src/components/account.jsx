@@ -30,6 +30,8 @@ import {
   withStyles
 } from '@material-ui/core';
 
+import { InfoOutlined as InfoIcon } from '@material-ui/icons';
+
 // Shared layouts
 import { Dashboard as DashboardLayout } from 'react-material-dashboard/src/layouts';
 
@@ -151,10 +153,14 @@ export class AccountDetails extends Component {
   }
 
   saveUser = async () => {
-    this.setState({message: ''});
-    await usersService.saveUserDetails(this.state);
-    this.props.dispatch({type: 'USER_UPDATE', payload: this.state});
-    this.setState({message: 'Details successfully updated'});
+    this.setState({message: '', saving: true});
+    try {
+      await usersService.saveUserDetails(this.state);
+      this.props.dispatch({type: 'USER_UPDATE', payload: this.state});
+      this.setState({message: 'Details successfully updated', saving: false});
+    } catch (e) {
+      this.setState({message: 'Unknown error occurred', saving: false});
+    }
   }
 
   render() {
@@ -197,7 +203,7 @@ export class AccountDetails extends Component {
           </div>
         </PortletContent>
         <PortletFooter className={classes.portletFooter}>
-          <Button color="primary" variant="contained" onClick={this.saveUser}>
+          <Button color="primary" variant="contained" onClick={this.saveUser} disabled={this.state.saving}>
             Save details
           </Button>
           <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
@@ -240,17 +246,24 @@ export class AccountBilling extends Component {
     savePayment = (ev) => {
       ev.preventDefault();
       const request = {type: 'card'};
+      this.setState({saving: true});
       this.props.stripe.createToken(request).then(
         token => {
           if (!token.token) return;
-          console.log('token',  token);
           const card = {
             token: token.token.id
           };
           usersService.saveCreditCard(card).then(
-            currentCard => this.setState({currentCard})
-          )
+            currentCard => {
+              alert('Payment details successfully updated.');
+              this.setState({currentCard, newCard: false});
+            }
+          ).finally(
+            () => this.setState({saving: false})
+          );
         }
+      ).catch(
+        () => this.setState({saving: false})
       );
     };
 
@@ -324,11 +337,13 @@ export class AccountBilling extends Component {
                 </div>
               </PortletContent>
               <PortletFooter className={classes.portletFooter}>
-                <Button type="submit" color="primary" variant="contained">
+                <Button type="submit" color="primary" variant="contained" disabled={this.state.saving}>
                   Update Payment Details
                 </Button>
-                <PortletLabel subtitle='Secure payment provided by https://stripe.com'
-                  style={{marginTop: '10px'}}/>
+                <div style={{marginTop: '10px'}}>
+                  <InfoIcon style={{marginBottom: '-5px'}}/> Secure payment provided by <a href="https://stripe.com">Stripe</a>.
+                </div>
+                <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
               </PortletFooter>
             </>
             }
