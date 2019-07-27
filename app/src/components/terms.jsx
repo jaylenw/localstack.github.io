@@ -21,7 +21,6 @@ const styles = theme => ({
 });
 
 
-
 export default class TermsOfService extends Component {
 
     render() {

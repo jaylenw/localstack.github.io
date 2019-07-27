@@ -1,18 +1,18 @@
 # Terms and Conditions
 
 By using the LocalStack Platform or LocalStack App ("Services"), or any service of LocalStack e.U. ("LocalStack") the person or organization ("Customer" or "you") is agreeing to be bound by the following terms and conditions ("Terms"). By accepting these Terms, signing an Order, or using the Services, you represent that you are of legal age and have the authority to bind the Customer to the Order and these Terms.
- 
+
 If LocalStack makes material changes to these Terms, we will notify you by email or by posting a notice on our site before the changes are effective. Any new features that augment or enhance the current Service, including the release of new tools and resources, shall be subject to these Terms. Continued use of the Service after any such changes shall constitute your consent to such changes.
 
 Violation of any of the terms below will result in the termination of your Account. You agree to use the Service at your own risk.
-   
-## API USAGE TERMS 
+
+## API USAGE TERMS
 Customers may access their LocalStack account data via an API (Application Program Interface). Any use of the API, including use of the API through a third-party product that accesses LocalStack, is bound by these Terms plus the following specific terms:
 
    1. You expressly understand and agree that LocalStack shall not be liable for any direct, indirect, incidental, special, consequential or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data or other intangible losses (even if LocalStack has been advised of the possibility of such damages), resulting from your use of the API or third-party products that access data via the API.
    1. Abuse or excessively frequent requests to LocalStack via the API may result in the temporary or permanent suspension of your account’s access to the API. LocalStack, in its sole discretion, will determine abuse or excessive usage of the API. LocalStack will make a reasonable attempt via email to warn the account owner prior to suspension.
    1. LocalStack reserves the right at any time to modify or discontinue, temporarily or permanently, your access to the API (or any part thereof) with or without notice.
-   
+
 ## ACCESS AND USE OF THE SERVICES
 
 ### Right to Use Services
@@ -21,7 +21,7 @@ You agree to use the Services in accordance with the use levels by which we meas
 
 ### Limitations on Use
 
-By using our Services, you agree on behalf of yourself and your API Key users, not to (i) modify, prepare derivative works of, reverse engineer, decompile, or publish our program code or Services; (ii) knowingly or negligently use our Services in a way that abuses or disrupts our networks, user accounts, or the Services; (iii) transmit through the Services any harassing, indecent, obscene, fraudulent, or unlawful material; (iv) market, or resell the Services to any third party; (v) use the Services in violation of applicable laws, or regulations; (vi) use the Services to send unauthorized advertising, or spam; (vii) harvest, collect, or gather user data without their consent; or (viii) transmit through the Services any material that may infringe the intellectual property, privacy, or other rights of third parties.
+By using our Services, you agree on behalf of yourself and your API Key users, not to (i) modify, prepare derivative works of, reverse engineer, decompile, disassemble or derive source code, underlying ideas, algorithms, structure or organizational form from the LocalStack program code or Services; (ii) knowingly or negligently use our Services in a way that abuses or disrupts our networks, user accounts, or the Services; (iii) transmit through the Services any harassing, indecent, obscene, fraudulent, or unlawful material; (iv) market, or resell the Services to any third party; (v) use the Services in violation of applicable laws, or regulations; (vi) use the Services to send unauthorized advertising, or spam; (vii) harvest, collect, or gather user data without their consent; or (viii) transmit through the Services any material that may infringe the intellectual property, privacy, or other rights of third parties.
 
 ### Changes to Services
 
@@ -38,7 +38,7 @@ You acknowledge that we retain all proprietary right, title and interest in the 
 You may order Services using our then-current ordering processes ("Order"). All Orders are effective on the date you submit your Order. Acceptance of your Order may be subject to our verification and credit approval process. Each Order shall be treated as a separate and independent Order.
 
 ### Payment, Fees, Upgrading and Downgrading Terms
-   
+
 All paid plans must enter a valid payment account. You are responsible for providing accurate and current billing, contact and payment information to us. You agree that we may take steps to verify whether your payment method is valid, charge your payment card or bill you for all amounts due for your use of the Services. You agree that your credit card information and related personal data may be provided to third parties for payment processing and fraud prevention purposes. We may suspend or terminate your Services if at any time we determine that your payment information is inaccurate or not current, and you are responsible for fees and overdraft charges that we may incur when we charge your card for payment. You agree to pay all applicable, undisputed fees for the Services on the terms set forth on the invoice. Except as set forth in Section 3.3 below or in the Service Descriptions, any and all payments you make to us for access to the Services are final and non-refundable. An upgrade of your plan will immediately bill you. For monthly payment plans, the Service is billed in advance on a monthly basis. There will be no refunds or credits for partial months of service, upgrade/downgrade refunds, or refunds for months unused with an open account. When changing from a monthly billing cycle to a yearly billing cycle, LocalStack will bill for a full year at the next monthly billing date. Downgrading your Service may cause the loss of Content, features, or capacity of your Account. LocalStack does not accept any liability for such loss. For any upgrade or downgrade in plan level while on a monthly billing cycle, the credit card that you provided will automatically be charged the new rate on your next billing cycle. For upgrades while on a yearly plan, LocalStack will immediately charge the difference in plan cost, prorated for the remaining time in your yearly billing cycle. We reserve the right to update the price for Services at any time after your Initial Term, and price changes will be effective as of your next billing cycle. We will notify you of any price changes by publishing on our website, emailing, quoting or invoicing you.
 
 ### Sales, Promotional Offers, Coupons and Pricing
@@ -52,13 +52,13 @@ You must notify us of any fee dispute within 15 days of the invoice date, and on
 ### Taxes and Withholding
 
 All fees are exclusive of all taxes, levies, or duties imposed by taxing authorities, and you shall be responsible for payment of all such taxes, levies, or duties. You are responsible for all applicable sales, services, value-added, goods and services, withholding, tariffs and similar taxes or fees (collectively, "Taxes and Fees") imposed by any government entity or collecting agency based on the Services, except those Taxes and Fees based on our net income, or Taxes and Fees for which you have provided an exemption certificate. Additionally, if you do not satisfy your Tax and Fees obligations, you agree that you will be required to reimburse us for any Taxes and Fees paid on your behalf, and we may take steps to collect Taxes and Fees we have paid on your behalf. In all cases, you will pay the amounts due under this Agreement to us in full without any right of set-off or deduction.
-   
+
 
 ## TERM AND TERMINATION
 
 ### Term
 
-The initial term commitment for your purchase of Services will be as specified on an Order ("Initial Term") and begins on the Effective Date. After the Initial Term, the Services will, unless otherwise specified in the Service Description for a particular Service, automatically renew for additional 12-month periods ("Renewal Terms"), unless either party provides notice of non-renewal at least 30 days before the current term expires. You may provide notice of non-renewal for each Service you do not wish to renew at https://support.LocalStackinc.com/contactus. We may agree to align the invoicing under multiple Orders but this will not reduce the term of any Order. Terminating specific Services does not affect the term of any other Services still in effect. If we permit you to reinstate Services at any time after termination, you agree that you will be bound by the then-current Terms and the renewal date that was in effect as of the effective termination date.
+The initial term commitment for your purchase of Services will be as specified on an Order ("Initial Term") and begins on the Effective Date. After the Initial Term, the Services will, unless otherwise specified in the Service Description for a particular Service, automatically renew for additional 12-month periods ("Renewal Terms"), unless either party provides notice of non-renewal at least 30 days before the current term expires. You may provide notice of non-renewal for each Service you do not wish to renew at https://app.localstack.cloud. We may agree to align the invoicing under multiple Orders but this will not reduce the term of any Order. Terminating specific Services does not affect the term of any other Services still in effect. If we permit you to reinstate Services at any time after termination, you agree that you will be bound by the then-current Terms and the renewal date that was in effect as of the effective termination date.
 
 ### Termination for Cause
 
@@ -80,7 +80,7 @@ You retain all rights to your Content (defined below) and we do not own or licen
 
 ### Your Accounts
 
-You are responsible for all activity that occurs under your account (even when activities are performed by others who use API keys under your account). You are solely responsible for (i) all use of the Services by you and your users, (ii) maintaining lawful basis for the collection, use, processing and transfer of Content, and (iii) providing notices or obtaining consent as legally required in connection with the Services. Accounts registered by “bots” or other automated methods are not permitted. You must provide your name, a valid email address, and any other information requested in order to complete the signup process. Your login may only be used by one person – i.e., a single login may not be shared by multiple people. You are responsible for maintaining the security of your account and password. LocalStack cannot and will not be liable for any loss or damage from your failure to comply with this security obligation. We do not send emails asking for your usernames or passwords, and to keep your accounts secure, you should keep all usernames and passwords confidential. 
+You are responsible for all activity that occurs under your account (even when activities are performed by others who use API keys under your account). You are solely responsible for (i) all use of the Services by you and your users, (ii) maintaining lawful basis for the collection, use, processing and transfer of Content, and (iii) providing notices or obtaining consent as legally required in connection with the Services. Accounts registered by “bots” or other automated methods are not permitted. You must provide your name, a valid email address, and any other information requested in order to complete the signup process. Your login may only be used by one person – i.e., a single login may not be shared by multiple people. You are responsible for maintaining the security of your account and password. LocalStack cannot and will not be liable for any loss or damage from your failure to comply with this security obligation. We do not send emails asking for your usernames or passwords, and to keep your accounts secure, you should keep all usernames and passwords confidential.
 You may not use the Services for any illegal or unauthorized purpose. You must not, in the use of the Services, violate any laws in your jurisdiction (including but not limited to copyright or trademark laws). We may suspend the Services or terminate the Agreement if you or your users are using the Services in a manner that is likely to cause harm to us. You agree to notify us immediately and terminate any unauthorized access to the Services or other security breach.
 
 ## COMPLIANCE WITH LAWS

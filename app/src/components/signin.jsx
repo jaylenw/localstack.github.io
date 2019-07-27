@@ -5,6 +5,12 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { usersService } from '../services/users';
 
+import ReactMarkdown from 'react-markdown';
+import 'github-markdown-css';
+
+/* eslint import/no-webpack-loader-syntax: 0 */
+import markdown from '!!raw-loader!../assets/terms.md';
+
 // Material components
 import {
   Grid,
@@ -30,8 +36,6 @@ import { withStyles } from '@material-ui/core';
 
 // Material icons
 import { ArrowBack as ArrowBackIcon } from '@material-ui/icons';
-
-import terms from '../assets/terms';
 
 const leftPanel = (classes) => (
   <Grid className={classes.quoteWrapper} item lg={5}>
@@ -79,11 +83,10 @@ export class TermsConditions extends Component {
     return (
       <Modal open={this.isOpen()} onClose={this.handleClose}>
         <Portlet className={modalClassName}>
-          <PortletHeader>
-            <PortletLabel title="Terms and Conditions"/>
-          </PortletHeader>
           <PortletContent>
-            {terms}
+            <div style={{height: '600px', overflow: 'auto'}}>
+              <ReactMarkdown source={markdown} className={'markdown-body'}/>
+            </div>
           </PortletContent>
           <PortletFooter className={classes.portletFooter}>
             <Button color="primary" variant="contained" onClick={this.handleClose}>Close</Button>
