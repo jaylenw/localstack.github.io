@@ -25,8 +25,6 @@ import {
 
 import {
   Portlet,
-  PortletHeader,
-  PortletLabel,
   PortletContent,
   PortletFooter
 } from 'react-material-dashboard/src/components';

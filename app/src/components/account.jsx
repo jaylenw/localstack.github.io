@@ -246,14 +246,17 @@ export class AccountBilling extends Component {
     savePayment = (ev) => {
       ev.preventDefault();
       const request = {type: 'card'};
-      this.setState({saving: true});
+      this.setState({saving: true, errorMessage: ''});
       this.props.stripe.createToken(request).then(
         token => {
-          if (!token.token) return;
+          if (!token.token) {
+            this.setState({errorMessage: 'Please check your card details'});
+            return;
+          }
           const card = {
             token: token.token.id
           };
-          usersService.saveCreditCard(card).then(
+          return usersService.saveCreditCard(card).then(
             currentCard => {
               alert('Payment details successfully updated.');
               this.setState({currentCard, newCard: false});
@@ -263,6 +266,8 @@ export class AccountBilling extends Component {
           );
         }
       ).catch(
+        () => this.setState({errorMessage: 'Please check your card details'})
+      ).finally(
         () => this.setState({saving: false})
       );
     };
@@ -343,7 +348,10 @@ export class AccountBilling extends Component {
                 <div style={{marginTop: '10px'}}>
                   <InfoIcon style={{marginBottom: '-5px'}}/> Secure payment provided by <a href="https://stripe.com">Stripe</a>.
                 </div>
-                <PortletLabel subtitle={this.state.message} style={{marginTop: '10px'}}/>
+                <div style={{marginTop: '10px'}}>
+                  <PortletLabel subtitle={this.state.message}/>
+                  <div style={{color: 'red'}}>{this.state.errorMessage}</div>
+                </div>
               </PortletFooter>
             </>
             }
